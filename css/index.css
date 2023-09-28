@@ -1874,7 +1874,7 @@ figure.highlight pre .javascript .function {
 #article-container .code-expand-btn:not(.expand-done) ~ table,
 #article-container .code-expand-btn:not(.expand-done) ~ pre {
   overflow: hidden;
-  height: 30px;
+  height: 80px;
 }
 @-moz-keyframes code-expand-key {
   0% {
