@@ -57,6 +57,103 @@
       </tags>
   </entry>
   <entry>
+    <title>2023NepNep-Writeup</title>
+    <url>/2023/09/29/2023NepNep-Writeup/</url>
+    <content><![CDATA[<h1 id="2023NepNep-Writeup"><a href="#2023NepNep-Writeup" class="headerlink" title="2023NepNep-Writeup"></a>2023NepNep-Writeup</h1><h2 id="Web"><a href="#Web" class="headerlink" title="Web"></a>Web</h2><h3 id="ez-java-checkin"><a href="#ez-java-checkin" class="headerlink" title="ez_java_checkin"></a>ez_java_checkin</h3><p>提示管理员登陆，admin默认</p>
+<p><img src="https://s2.loli.net/2023/09/29/eTOApcdyrMXtwzR.png"></p>
+<p>发现rememberMe&#x3D;deleteMe，查询找到相关漏洞</p>
+<p>工具一把梭</p>
+<p><img src="https://s2.loli.net/2023/09/29/zTWpvLM6VZRPdxO.png"></p>
+<p>注入内存马</p>
+<p><img src="https://s2.loli.net/2023/09/29/VIqdTD8banlQ3uX.png"></p>
+<p>连接webshell</p>
+<p><img src="https://s2.loli.net/2023/09/29/w2NgWBtjGOxZAHU.png"></p>
+<p>开始寻找flag，在start.sh中找到</p>
+<p><img src="https://s2.loli.net/2023/09/29/s4phrUitKWZTBvN.png"></p>
+<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><h3 id="CheckIn"><a href="#CheckIn" class="headerlink" title="CheckIn"></a>CheckIn</h3><p><img src="https://s2.loli.net/2023/09/29/TWKFvQROpV9ySxu.png"></p>
+<h3 id="与AI共舞的哈夫曼"><a href="#与AI共舞的哈夫曼" class="headerlink" title="与AI共舞的哈夫曼"></a>与AI共舞的哈夫曼</h3><p>给的是一段压缩算法，根据提示交给chtgpt</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import heapq</span><br><span class="line"></span><br><span class="line">class HuffmanNode:</span><br><span class="line">    def __init__(self, char, freq):</span><br><span class="line">        self.char = char</span><br><span class="line">        self.freq = freq</span><br><span class="line">        self.left = None</span><br><span class="line">        self.right = None</span><br><span class="line"></span><br><span class="line">    def __lt__(self, other):</span><br><span class="line">        return self.freq &lt; other.freq</span><br><span class="line"></span><br><span class="line">def build_huffman_tree(frequencies):</span><br><span class="line">    heap = [HuffmanNode(char, freq) for char, freq in frequencies.items()]</span><br><span class="line">    heapq.heapify(heap)</span><br><span class="line"></span><br><span class="line">    while len(heap) &gt; 1:</span><br><span class="line">        left = heapq.heappop(heap)</span><br><span class="line">        right = heapq.heappop(heap)</span><br><span class="line">        merged = HuffmanNode(None, left.freq + right.freq)</span><br><span class="line">        merged.left = left</span><br><span class="line">        merged.right = right</span><br><span class="line">        heapq.heappush(heap, merged)</span><br><span class="line"></span><br><span class="line">    return heap[0]</span><br><span class="line"></span><br><span class="line">def decompress(input_file, output_file):</span><br><span class="line">    with open(input_file, &#x27;rb&#x27;) as f:</span><br><span class="line">        data = f.read()</span><br><span class="line"></span><br><span class="line">    num_symbols = data[0]</span><br><span class="line">    frequencies = &#123;&#125;</span><br><span class="line">    offset = 1</span><br><span class="line"></span><br><span class="line">    for i in range(num_symbols):</span><br><span class="line">        byte = data[offset]</span><br><span class="line">        freq = (data[offset + 1] &lt;&lt; 24) | (data[offset + 2] &lt;&lt; 16) | (data[offset + 3] &lt;&lt; 8) | data[offset + 4]</span><br><span class="line">        frequencies[byte] = freq</span><br><span class="line">        offset += 5</span><br><span class="line"></span><br><span class="line">    root = build_huffman_tree(frequencies)</span><br><span class="line"></span><br><span class="line">    decoded_data = &#x27;&#x27;</span><br><span class="line">    current_node = root</span><br><span class="line"></span><br><span class="line">    for byte in data[offset:]:</span><br><span class="line">        bits = bin(byte)[2:].rjust(8, &#x27;0&#x27;)</span><br><span class="line">        for bit in bits:</span><br><span class="line">            if bit == &#x27;0&#x27;:</span><br><span class="line">                current_node = current_node.left</span><br><span class="line">            else:</span><br><span class="line">                current_node = current_node.right</span><br><span class="line"></span><br><span class="line">            if current_node.char is not None:</span><br><span class="line">                decoded_data += chr(current_node.char)</span><br><span class="line">                current_node = root</span><br><span class="line"></span><br><span class="line">    with open(output_file, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:</span><br><span class="line">        f.write(decoded_data)</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    compressed_file = &#x27;compressed.bin&#x27;</span><br><span class="line">    decompressed_file = &#x27;decompressed.txt&#x27;</span><br><span class="line"></span><br><span class="line">    # 解压缩文件</span><br><span class="line">    decompress(compressed_file, decompressed_file)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/09/29/o5xBwTz7MJUCFi2.png"></p>
+<h3 id="小叮弹钢琴"><a href="#小叮弹钢琴" class="headerlink" title="小叮弹钢琴"></a>小叮弹钢琴</h3><p>首先给的一段音频，用Au打开，发现包含两个内容，一个明显是十六制数字，另外一个怀疑是摩斯密码，手写下来解码得到一段明文</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YOUSHOULDUSETHISTOXORSOMETHING</span><br></pre></td></tr></table></figure>
+
+<p>根据提示，考虑异或解密，手搓了一段脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cipher_text_hex = &quot;0x370a05303c290e045005031c2b1858473a5f052117032c39230f005d1e17&quot;</span><br><span class="line">cipher_text_bytes = bytes.fromhex(cipher_text_hex[2:])</span><br><span class="line">key = &quot;YOUSHOULDUSETHISTOXORSOMETHING&quot;</span><br><span class="line">key_bytes = key.encode()</span><br><span class="line">plain_text_bytes = bytearray(len(cipher_text_bytes))</span><br><span class="line"></span><br><span class="line">for i in range(len(cipher_text_bytes)):</span><br><span class="line">    plain_text_bytes[i] = cipher_text_bytes[i] ^ key_bytes[i % len(key_bytes)]</span><br><span class="line"></span><br><span class="line">decrypted_text = plain_text_bytes.decode()</span><br><span class="line"></span><br><span class="line">print(&quot;Decrypted Text:&quot;, decrypted_text)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>但是解下来出现了nep字样，但是字符不对劲</p>
+<p><img src="https://s2.loli.net/2023/09/29/FoR42QkXEf7JsSh.png"></p>
+<p>然后用CyberChef一把梭，得到了结果</p>
+<p><img src="https://s2.loli.net/2023/09/29/DpPRqJvEW8SImNB.png"></p>
+<p>应该是脚本存在问题，但是代码能力有限，真想不出来了，等赛后wp吧</p>
+<h3 id="codes"><a href="#codes" class="headerlink" title="codes"></a>codes</h3><p>根据提示，flag在环境变量中</p>
+<p>根据查找，有一下几种方法</p>
+<ol>
+<li><p><strong>使用 <code>extern char **environ</code> 全局变量：</strong></p>
+<p>这是一种直接的方法，使用全局变量 <code>environ</code>，它是一个指向指针的指针，用于存储环境变量的字符串数组。遍历这个数组并打印环境变量的值。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (environ[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, environ[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用 <code>getenv()</code> 函数：</strong></p>
+<p><code>getenv()</code> 函数允许你通过指定环境变量名称来获取其值。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* env_var_name = <span class="string">&quot;PATH&quot;</span>;</span><br><span class="line">    <span class="type">char</span>* env_var_value = getenv(env_var_name);</span><br><span class="line">    <span class="keyword">if</span> (env_var_value != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s=%s\n&quot;</span>, env_var_name, env_var_value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Environment variable &#x27;%s&#x27; not found.\n&quot;</span>, env_var_name);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>使用 <code>main()</code> 函数的参数 <code>char *argv[]</code>：</strong></p>
+<p>程序的启动参数中也包含了环境变量信息。这种方法需要一些额外的解析工作。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[], <span class="type">char</span> *envp[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (envp[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, envp[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>逐个尝试，全部失败了</p>
+<p>开始尝试各种绕过姿势</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">extern char **en\</span><br><span class="line">viron;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">    int i = 0;</span><br><span class="line">    while (en\</span><br><span class="line">viron[i] != NULL) &#123;</span><br><span class="line">        printf(&quot;%s\n&quot;, en\</span><br><span class="line">viron[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终得到flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Nepctf&#123;easy_codes_3a5786c2-dd96-46bd-9909-23f894dc8d2a_[TEAM_HASH]&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ConnectedFive"><a href="#ConnectedFive" class="headerlink" title="ConnectedFive"></a>ConnectedFive</h3><p><img src="https://s2.loli.net/2023/09/29/DIuOpeSJkYsTxWf.png"></p>
+<p>万宁，果真折磨</p>
+<h3 id="陌生的语言"><a href="#陌生的语言" class="headerlink" title="陌生的语言"></a>陌生的语言</h3><p>没啥好说的，上图，比较好奇出题人到底是怎么找到的这个图</p>
+<p><img src="https://s2.loli.net/2023/09/29/ifCgDS2O9Jzdw1y.jpg"></p>
+<p><img src="https://s2.loli.net/2023/09/29/wofOdTlQaR38XpE.png"></p>
+<p>然后将对应一下，最终成功提交上去的flag为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NepCTF&#123;NEPNEP_A_BELIEVING_HEART_IS_YOUR_MAGIC&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="你也喜欢三月七么"><a href="#你也喜欢三月七么" class="headerlink" title="你也喜欢三月七么"></a>你也喜欢三月七么</h3><p>拿到手刚开始以为这个题是密码的，当然，也确实有部分是，但主要可能是考察阅读理解。我还想再说一句，星穹铁道，启动！</p>
+<p>首先先来看一下附件给了我们什么内容</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">salt_lenth= 10 </span><br><span class="line">key_lenth= 16 </span><br><span class="line">iv= 88219bdee9c396eca3c637c0ea436058 #原始iv转hex的值</span><br><span class="line">ciphertext= b700ae6d0cc979a4401f3dd440bf9703b292b57b6a16b79ade01af58025707fbc29941105d7f50f2657cf7eac735a800ecccdfd42bf6c6ce3b00c8734bf500c819e99e074f481dbece626ccc2f6e0562a81fe84e5dd9750f5a0bb7c20460577547d3255ba636402d6db8777e0c5a429d07a821bf7f9e0186e591dfcfb3bfedfc</span><br></pre></td></tr></table></figure>
+
+<p>第一个是salt的长度，第二个是key的长度，第三个是偏移量iv，第四个就是相对应的密文了</p>
+<p>其次，来分析一下题目给的提示</p>
+<p><u><strong>三月七：耶，终于来到Nepnep星球啦，让我看看正在火热进行的Hacker夺旗大赛群聊。啊！开拓者，这群名看起来怪怪的诶。 （伸出脑袋，凑近群名，轻轻的闻了一下）哇，好咸诶，开拓者你快来看看！</strong></u></p>
+<p><u><strong>开拓者（U_id）：(端着下巴，磨蹭了一下，眼神若有所思）这好像需要经过啥256处理一下才能得到我们需要的关键。</strong></u></p>
+<p>第一次阅读的时候我的关注点就是再256和群名两个关键上，256是指向hash算法，群名自然是跟附件中没有给出的key（PS：题目中关键的英文也是key）有关。</p>
+<p>但是我刚开始完全没有注意到一个长度的问题，也就是salt_lenth&#x3D; 10 和key_lenth&#x3D; 16，而是将NepCTF 2023直接哈希计算了，中间留了空格（PS：因为我看群名也是留了空格的），甚至因为存在salt这个量还在考虑是否算法还进行了变种，然后尝试aes解密失败了。后来又从题目里的关键提示，也就是三月七闻群名好咸，咸指的自然就是盐，而盐的英文是salt。意识到这一点，也就开始知道为什么给出了两个长度值了salt的长度是提示使用NepCTF2023（PS:不加空格，刚好十个字），然后开始计算哈希256，得到的是</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dd8e671df3882c5be6423cd030bd7cb69671ef27dfe7a541903edc4e23168009</span><br></pre></td></tr></table></figure>
+
+<p>但是长度是32个字节，所以需要截取出一半作为key，具体代码实现如下</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">from Crypto.Cipher import AES</span><br><span class="line">import binascii</span><br><span class="line"></span><br><span class="line">*#* *提供的信息</span><br><span class="line">*key_hex = &quot;dd8e671df3882c5be6423cd030bd7cb6&quot;</span><br><span class="line">iv_hex = &quot;88219bdee9c396eca3c637c0ea436058&quot;</span><br><span class="line">ciphertext_hex = &quot;b700ae6d0cc979a4401f3dd440bf9703b292b57b6a16b79ade01af58025707fbc29941105d7f50f2657cf7eac735a800ecccdfd42bf6c6ce3b00c8734bf500c819e99e074f481dbece626ccc2f6e0562a81fe84e5dd9750f5a0bb7c20460577547d3255ba636402d6db8777e0c5a429d07a821bf7f9e0186e591dfcfb3bfedfc&quot;</span><br><span class="line"></span><br><span class="line">*#* *将十六进制的**key**、**iv**和**ciphertext**转换为字节串</span><br><span class="line">*key = binascii.unhexlify(key_hex)</span><br><span class="line">iv = binascii.unhexlify(iv_hex)</span><br><span class="line">ciphertext = binascii.unhexlify(ciphertext_hex)</span><br><span class="line"></span><br><span class="line">*#* *创建**AES**解密器对象</span><br><span class="line">*cipher = AES.new(key, AES.MODE_CBC, iv)</span><br><span class="line"></span><br><span class="line">*#* *解密数据</span><br><span class="line">*decrypted_data = cipher.decrypt(ciphertext)</span><br><span class="line"></span><br><span class="line">*#* *将解密后的字节数据转换为字符串</span><br><span class="line">*decrypted_string = decrypted_data.decode(&#x27;utf-8&#x27;)</span><br><span class="line"></span><br><span class="line">*#* *打印解密后的字符串</span><br><span class="line">*print(decrypted_string)</span><br></pre></td></tr></table></figure>
+
+<p>最终计算下来结果为一串十六进制</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6148523063484d364c793970625763784c6d6c745a3352774c6d4e76625338794d44497a4c7a41334c7a49304c336c5061316858553070554c6e42755a773d3d</span><br></pre></td></tr></table></figure>
+
+<p>然后转字符，转base64得到网址</p>
+<p><strong><a href="https://img1.imgtp.com/2023/07/24/yOkXWSJT.png">https://img1.imgtp.com/2023/07/24/yOkXWSJT.png</a></strong></p>
+<p>下载下来一张图片</p>
+<p><img src="https://s2.loli.net/2023/09/29/8eWuRQc2y3htlYi.png"></p>
+<p>然后第一反应识图，结果google继陌生的语言后又失效喽（悲</p>
+<p>后来又想到题目一开始就有了提示，星穹铁道，然后搜索相关的文字，找到了贝洛伯格特殊文字</p>
+<p><img src="https://s2.loli.net/2023/09/29/biMX7Bx8CuJwScr.jpg"></p>
+<p>然后跟表对照得到最终的flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NepCTF&#123;HRP_aIways_likes_March_7th&#125;</span><br></pre></td></tr></table></figure>
+
+<p>(PS:做图文题做到够，麻了)</p>
+]]></content>
+      <categories>
+        <category>Writeup</category>
+      </categories>
+      <tags>
+        <tag>NepNep</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>常用编码</title>
     <url>/2023/09/29/Misc(1)-%E5%B8%B8%E7%94%A8%E7%BC%96%E7%A0%81/</url>
     <content><![CDATA[<h1 id="常用编码"><a href="#常用编码" class="headerlink" title="常用编码"></a>常用编码</h1><p>其实本来想写一个很全的，结果越整理越心累，就半途而废了（，后续如果有机会再完善吧</p>
@@ -384,181 +481,6 @@
       </tags>
   </entry>
   <entry>
-    <title>内存取证初识</title>
-    <url>/2023/09/29/%E5%8F%96%E8%AF%81%EF%BC%881%EF%BC%89%E5%86%85%E5%AD%98%E5%8F%96%E8%AF%81%E5%88%9D%E8%AF%86/</url>
-    <content><![CDATA[<h1 id="内存取证"><a href="#内存取证" class="headerlink" title="内存取证"></a>内存取证</h1><p>&emsp;&emsp;内存取证是指在计算机系统的内存中进行取证分析，以获取有关计算机系统当前状态的信息。内存取证通常用于分析计算机系统上运行的进程、网络连接、文件、注册表等信息，并可以用于检测和分析恶意软件、网络攻击和其他安全事件</p>
-<h2 id="Volatility"><a href="#Volatility" class="headerlink" title="Volatility"></a>Volatility</h2><p>&emsp;&emsp;Volatility是一款开源的内存分析框架，主要用于从计算机内存中提取数字证据。它可以用于取证、恶意代码分析、漏洞研究、操作系统学习以及其他安全领域</p>
-<h3 id="基本命令使用格式"><a href="#基本命令使用格式" class="headerlink" title="基本命令使用格式"></a>基本命令使用格式</h3><pre><code>python vol.py -f [image] ‐-profile=[profile][plugin] 命令
-
-其中 -f 后面加的是要取证的文件， --profile 后加的是工具识别出的系统版本， [plugin] 是指使用的插件，其中默认存在一些插件，另外还可以自己下载一些插件扩充
-</code></pre>
-<p><img src="https://s2.loli.net/2023/09/29/BHWkJuCXGl4ODg9.png"><br>使用<code>python vol.py -h </code>命令可查看基本的使用帮助</p>
-<h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p>&emsp;&emsp;内存取证的流程简要概况就是以下几步：解析Windows&#x2F;Linux&#x2F;Mac OS的内存结构、分析进程等内存数据、根据题目提示寻找线索和思路，提取分析指定进程的特定内存数据.<br>&emsp;&emsp;识别常用文件名后缀，如raw文件、vmem文件、img文件、dmp文件等内存镜像文件</p>
-<pre><code>volatility -f [] imageinfo 
-[]中添加文件名
-</code></pre>
-<p>&emsp;&emsp;用该命令查看基本信息，根据查到的信息确定profile的值<br>剩下的基本流程可以推荐看一下<a href="https://cloud.tencent.com/developer/article/1419462" title="volatility">这篇博客</a></p>
-<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><ul>
-<li>amcache        	查看AmCache应用程序痕迹信息</li>
-<li>apihooks       	检测内核及进程的内存空间中的API hook</li>
-<li>atoms          	列出会话及窗口站atom表</li>
-<li>atomscan       	Atom表的池扫描(Pool scanner)</li>
-<li>auditpol       	列出注册表HKLMSECURITYPolicyPolAdtEv的审计策略信息</li>
-<li>bigpools       	使用BigPagePoolScanner转储大分页池(big page pools)</li>
-<li>bioskbd        	从实时模式内存中读取键盘缓冲数据(早期电脑可以读取出BIOS开机密码)</li>
-<li>cachedump      	获取内存中缓存的域帐号的密码哈希</li>
-<li>callbacks      	打印全系统通知例程</li>
-<li>clipboard      	提取Windows剪贴板中的内容</li>
-<li>cmdline        	显示进程命令行参数</li>
-<li>cmdscan        	提取执行的命令行历史记录（扫描 COMMAND HISTORY信息）</li>
-<li>connections    	打印系统打开的网络连接(仅支持Windows XP 和2003)</li>
-<li>connscan       	打印TCP连接信息</li>
-<li>consoles       	提取执行的命令行历史记录（扫描 CONSOLE INFORMATION信息）</li>
-<li>crashinfo      	提取崩溃转储信息</li>
-<li>deskscan       	tagDESKTOP池扫描(Poolscaner)</li>
-<li>devicetree     	显示设备树信息</li>
-<li>dlldump        	从进程地址空间转储动态链接库</li>
-<li>dlllist        	打印每个进程加载的动态链接库列表</li>
-<li>driverirp      	IRP hook驱动检测</li>
-<li>drivermodule   	关联驱动对象至内核模块</li>
-<li>driverscan     	驱动对象池扫描</li>
-<li>dumpcerts      	提取RAS私钥及SSL公钥</li>
-<li><strong>dumpfiles      	提取内存中映射或缓存的文件</strong></li>
-<li>dumpregistry   	转储内存中注册表信息至磁盘</li>
-<li>editbox        	查看Edit编辑控件信息 (Listbox正在实验中)</li>
-<li><strong>envars         	显示进程的环境变量</strong></li>
-<li>eventhooks     	打印Windows事件hook详细信息</li>
-<li>evtlogs        	提取Windows事件日志（仅支持XP&#x2F;2003)</li>
-<li><strong>filescan       	提取文件对象（file objects）池信息</strong></li>
-<li>gahti          	转储用户句柄（handle）类型信息</li>
-<li>gditimers      	打印已安装的GDI计时器(timers)及回调(callbacks)</li>
-<li>gdt            	显示全局描述符表(Global Deor Table)</li>
-<li>getservicesids 	获取注册表中的服务名称并返回SID信息</li>
-<li>getsids        	打印每个进程的SID信息</li>
-<li>handles        	打印每个进程打开的句柄的列表</li>
-<li><strong>hashdump       	转储内存中的Windows帐户密码哈希(LM&#x2F;NTLM)</strong></li>
-<li>hibinfo        	转储休眠文件信息</li>
-<li><strong>hivedump       	打印注册表配置单元信息</strong></li>
-<li><strong>hivelist       	打印注册表配置单元列表</strong></li>
-<li>hivescan       	注册表配置单元池扫描</li>
-<li>hpakextract    	从HPAK文件（Fast Dump格式）提取物理内存数据</li>
-<li>hpakinfo       	查看HPAK文件属性及相关信息</li>
-<li>idt            	显示中断描述符表(Interrupt Deor Table)</li>
-<li><strong>iehistory      	重建IE缓存及访问历史记录</strong></li>
-<li>imagecopy      	将物理地址空间导出原生DD镜像文件</li>
-<li>imageinfo      	查看&#x2F;识别镜像信息</li>
-<li>impscan        	扫描对导入函数的调用</li>
-<li>joblinks       	打印进程任务链接信息</li>
-<li>kdbgscan       	搜索和转储潜在KDBG值</li>
-<li>kpcrscan       	搜索和转储潜在KPCR值</li>
-<li>ldrmodules     	检测未链接的动态链接DLL</li>
-<li>lsadump        	从注册表中提取LSA密钥信息（已解密）</li>
-<li>machoinfo      	转储Mach-O 文件格式信息</li>
-<li>malfind        	查找隐藏的和插入的代码</li>
-<li>mbrparser      	扫描并解析潜在的主引导记录(MBR)</li>
-<li><strong>memdump        	转储进程的可寻址内存</strong></li>
-<li>memmap         	打印内存映射</li>
-<li>messagehooks   	桌面和窗口消息钩子的线程列表</li>
-<li>mftparser      	扫描并解析潜在的MFT条目</li>
-<li>moddump        	转储内核驱动程序到可执行文件的示例</li>
-<li>modscan        	内核模块池扫描</li>
-<li>modules        	打印加载模块的列表</li>
-<li>multiscan      	批量扫描各种对象</li>
-<li>mutantscan     	对互斥对象池扫描</li>
-<li><strong>notepad        	查看记事本当前显示的文本</strong></li>
-<li><strong>netscan           查看命令行操作</strong></li>
-<li>objtypescan    	扫描窗口对象类型对象</li>
-<li>patcher        	基于页面扫描的补丁程序内存</li>
-<li>poolpeek       	可配置的池扫描器插件</li>
-<li><strong>printkey       	打印注册表项及其子项和值</strong></li>
-<li>privs          	显示进程权限</li>
-<li>procdump       	进程转储到一个可执行文件示例</li>
-<li><strong>pslist         	按照EPROCESS列表打印所有正在运行的进程</strong></li>
-<li>psscan         	进程对象池扫描</li>
-<li>pstree         	以树型方式打印进程列表</li>
-<li>psxview        	查找带有隐藏进程的所有进程列表</li>
-<li>qemuinfo       	转储 Qemu 信息</li>
-<li>raw2dmp        	将物理内存原生数据转换为windbg崩溃转储格式</li>
-<li><strong>screenshot     	基于GDI Windows的虚拟屏幕截图保存</strong></li>
-<li>servicediff    	Windows服务列表(ala Plugx)</li>
-<li>sessions       	_MM_SESSION_SPACE的详细信息列表(用户登录会话)</li>
-<li>shellbags      	打印Shellbags信息</li>
-<li>shimcache      	解析应用程序兼容性Shim缓存注册表项</li>
-<li>shutdowntime   	从内存中的注册表信息获取机器关机时间</li>
-<li>sockets        	打印已打开套接字列表</li>
-<li>sockscan       	TCP套接字对象池扫描</li>
-<li>ssdt           	显示SSDT条目</li>
-<li>strings        	物理到虚拟地址的偏移匹配(需要一些时间，带详细信息)</li>
-<li><strong>svcscan        	Windows服务列表扫描</strong></li>
-<li>symlinkscan    	符号链接对象池扫描</li>
-<li>thrdscan       	线程对象池扫描</li>
-<li>threads        	调查_ETHREAD 和_KTHREADs</li>
-<li><strong>timeliner      	创建内存中的各种痕迹信息的时间线</strong></li>
-<li>timers         	打印内核计时器及关联模块的DPC</li>
-<li>truecryptmaster	Recover 	恢复TrueCrypt 7.1a主密钥</li>
-<li>truecryptpassphrase		查找并提取TrueCrypt密码</li>
-<li>truecryptsummary	TrueCrypt摘要信息</li>
-<li>unloadedmodules	打印卸载的模块信息列表</li>
-<li><strong>userassist     	打印注册表中UserAssist相关信息</strong></li>
-<li>userhandles    	转储用户句柄表</li>
-<li>vaddump        	转储VAD数据为文件</li>
-<li>vadinfo        	转储VAD信息</li>
-<li>vadtree        	以树形方式显示VAD树信息</li>
-<li>vadwalk        	显示遍历VAD树</li>
-<li>vboxinfo       	转储Virtualbox信息（虚拟机）</li>
-<li>verinfo        	打印PE镜像中的版本信息</li>
-<li>vmwareinfo     	转储VMware VMSS&#x2F;VMSN 信息</li>
-<li>volshell       	内存镜像中的shell</li>
-<li>windows        	打印桌面窗口(详细信息)</li>
-<li>wintree        	Z顺序打印桌面窗口树</li>
-<li>wndscan        	池扫描窗口站</li>
-<li>yarascan       	以Yara签名扫描进程或内核内存</li>
-</ul>
-<h2 id="其他工具"><a href="#其他工具" class="headerlink" title="其他工具"></a>其他工具</h2><h3 id="Dumplt"><a href="#Dumplt" class="headerlink" title="Dumplt"></a>Dumplt</h3><p>&emsp;&emsp;利用Dumplt可以将一个系统的完整内存镜像dump下来，dumplt制作的内存镜像(raw文件)与系统内存接近<br><img src="https://s2.loli.net/2023/09/29/QpI85BzeqYLk27K.png"></p>
-<h3 id="AccessData-FTK-Imager"><a href="#AccessData-FTK-Imager" class="headerlink" title="AccessData FTK Imager"></a>AccessData FTK Imager</h3><p><strong>主要功能</strong>：</p>
-<ol>
-<li><p>证据获取</p>
-</li>
-<li><p>哈希值计算</p>
-</li>
-<li><p>文件查看及提取</p>
-</li>
-<li><p>镜像文件挂载</p>
-</li>
-<li><p>数据恢复</p>
-</li>
-<li><p>特定数据提取</p>
-<p><img src="https://s2.loli.net/2023/09/29/1AIFx76qMDn4aev.png"></p>
-</li>
-</ol>
-<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>下载得到附件，为一个dump文件  </p>
-<p>先查看dump文件的profile值</p>
-<p>  <img src="https://s2.loli.net/2023/09/29/ugQZbrV7NXh1OmH.png"><br>展示进程</p>
-<p><img src="https://s2.loli.net/2023/09/29/h9SrAwkclRofWxb.png" alt="https://s2.loli.net/2023/09/29/h9SrAwkclRofWxb.png">  </p>
-<p>查看cmd命令，得知存在文件flag.ccx </p>
-<p><img src="https://s2.loli.net/2023/09/29/k6TmBaQqoZ1sFAP.png" alt="https://s2.loli.net/2023/09/29/k6TmBaQqoZ1sFAP.png">  </p>
-<p>寻找flag.ccx文件，文件地址为0x3e435890</p>
-<p><img src="https://s2.loli.net/2023/09/29/UVYw1xR4zDvMXF9.png" alt="https://s2.loli.net/2023/09/29/UVYw1xR4zDvMXF9.png">  </p>
-<p>dump文件</p>
-<p><img src="https://s2.loli.net/2023/09/29/2zay3veYw6dHTRq.png" alt="https://s2.loli.net/2023/09/29/2zay3veYw6dHTRq.png">  </p>
-<p>寻找administrator的密码,列出SAM表的用户</p>
-<p><img src="https://s2.loli.net/2023/09/29/fZeWzEJa6hiyDKO.png" alt="https://s2.loli.net/2023/09/29/fZeWzEJa6hiyDKO.png">  </p>
-<p>获取SYSTEM SAM的虚拟地址,分别为0xfffff8a000024010  0xfffff8a001590010</p>
-<p><img src="https://s2.loli.net/2023/09/29/dnEe5ZkHKsqxc8C.png" alt="https://s2.loli.net/2023/09/29/dnEe5ZkHKsqxc8C.png">  </p>
-<p>hashdump获取用户密码的hash值</p>
-<p><img src="https://s2.loli.net/2023/09/29/9T8dgItXK5NsLaH.png" alt="https://s2.loli.net/2023/09/29/9T8dgItXK5NsLaH.png">  </p>
-<p>CMD5查询hash值得到Administrator账户的密码</p>
-<p><img src="https://s2.loli.net/2023/09/29/VCKkj4bSzgXrJ3B.png" alt="https://s2.loli.net/2023/09/29/VCKkj4bSzgXrJ3B.png">  </p>
-<p>CnCrypt加载得到flag,密码为ABCabc123  </p>
-]]></content>
-      <categories>
-        <category>取证</category>
-      </categories>
-      <tags>
-        <tag>内存取证</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>linux提权</title>
     <url>/2023/09/29/linux%E6%8F%90%E6%9D%83%EF%BC%881%EF%BC%89sudo%E5%85%B6%E4%B8%80/</url>
     <content><![CDATA[<h1 id="Linux提权之sudo"><a href="#Linux提权之sudo" class="headerlink" title="Linux提权之sudo"></a>Linux提权之sudo</h1><p>近期开始学习一些linux提权相关的知识，本次是主要以sudo为主的提权学习，未完待续~~</p>
@@ -804,100 +726,247 @@
       </tags>
   </entry>
   <entry>
-    <title>2023NepNep-Writeup</title>
-    <url>/2023/09/29/2023NepNep-Writeup/</url>
-    <content><![CDATA[<h1 id="2023NepNep-Writeup"><a href="#2023NepNep-Writeup" class="headerlink" title="2023NepNep-Writeup"></a>2023NepNep-Writeup</h1><h2 id="Web"><a href="#Web" class="headerlink" title="Web"></a>Web</h2><h3 id="ez-java-checkin"><a href="#ez-java-checkin" class="headerlink" title="ez_java_checkin"></a>ez_java_checkin</h3><p>提示管理员登陆，admin默认</p>
-<p><img src="https://s2.loli.net/2023/09/29/eTOApcdyrMXtwzR.png"></p>
-<p>发现rememberMe&#x3D;deleteMe，查询找到相关漏洞</p>
-<p>工具一把梭</p>
-<p><img src="https://s2.loli.net/2023/09/29/zTWpvLM6VZRPdxO.png"></p>
-<p>注入内存马</p>
-<p><img src="https://s2.loli.net/2023/09/29/VIqdTD8banlQ3uX.png"></p>
-<p>连接webshell</p>
-<p><img src="https://s2.loli.net/2023/09/29/w2NgWBtjGOxZAHU.png"></p>
-<p>开始寻找flag，在start.sh中找到</p>
-<p><img src="https://s2.loli.net/2023/09/29/s4phrUitKWZTBvN.png"></p>
-<h2 id="Misc"><a href="#Misc" class="headerlink" title="Misc"></a>Misc</h2><h3 id="CheckIn"><a href="#CheckIn" class="headerlink" title="CheckIn"></a>CheckIn</h3><p><img src="https://s2.loli.net/2023/09/29/TWKFvQROpV9ySxu.png"></p>
-<h3 id="与AI共舞的哈夫曼"><a href="#与AI共舞的哈夫曼" class="headerlink" title="与AI共舞的哈夫曼"></a>与AI共舞的哈夫曼</h3><p>给的是一段压缩算法，根据提示交给chtgpt</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import heapq</span><br><span class="line"></span><br><span class="line">class HuffmanNode:</span><br><span class="line">    def __init__(self, char, freq):</span><br><span class="line">        self.char = char</span><br><span class="line">        self.freq = freq</span><br><span class="line">        self.left = None</span><br><span class="line">        self.right = None</span><br><span class="line"></span><br><span class="line">    def __lt__(self, other):</span><br><span class="line">        return self.freq &lt; other.freq</span><br><span class="line"></span><br><span class="line">def build_huffman_tree(frequencies):</span><br><span class="line">    heap = [HuffmanNode(char, freq) for char, freq in frequencies.items()]</span><br><span class="line">    heapq.heapify(heap)</span><br><span class="line"></span><br><span class="line">    while len(heap) &gt; 1:</span><br><span class="line">        left = heapq.heappop(heap)</span><br><span class="line">        right = heapq.heappop(heap)</span><br><span class="line">        merged = HuffmanNode(None, left.freq + right.freq)</span><br><span class="line">        merged.left = left</span><br><span class="line">        merged.right = right</span><br><span class="line">        heapq.heappush(heap, merged)</span><br><span class="line"></span><br><span class="line">    return heap[0]</span><br><span class="line"></span><br><span class="line">def decompress(input_file, output_file):</span><br><span class="line">    with open(input_file, &#x27;rb&#x27;) as f:</span><br><span class="line">        data = f.read()</span><br><span class="line"></span><br><span class="line">    num_symbols = data[0]</span><br><span class="line">    frequencies = &#123;&#125;</span><br><span class="line">    offset = 1</span><br><span class="line"></span><br><span class="line">    for i in range(num_symbols):</span><br><span class="line">        byte = data[offset]</span><br><span class="line">        freq = (data[offset + 1] &lt;&lt; 24) | (data[offset + 2] &lt;&lt; 16) | (data[offset + 3] &lt;&lt; 8) | data[offset + 4]</span><br><span class="line">        frequencies[byte] = freq</span><br><span class="line">        offset += 5</span><br><span class="line"></span><br><span class="line">    root = build_huffman_tree(frequencies)</span><br><span class="line"></span><br><span class="line">    decoded_data = &#x27;&#x27;</span><br><span class="line">    current_node = root</span><br><span class="line"></span><br><span class="line">    for byte in data[offset:]:</span><br><span class="line">        bits = bin(byte)[2:].rjust(8, &#x27;0&#x27;)</span><br><span class="line">        for bit in bits:</span><br><span class="line">            if bit == &#x27;0&#x27;:</span><br><span class="line">                current_node = current_node.left</span><br><span class="line">            else:</span><br><span class="line">                current_node = current_node.right</span><br><span class="line"></span><br><span class="line">            if current_node.char is not None:</span><br><span class="line">                decoded_data += chr(current_node.char)</span><br><span class="line">                current_node = root</span><br><span class="line"></span><br><span class="line">    with open(output_file, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:</span><br><span class="line">        f.write(decoded_data)</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    compressed_file = &#x27;compressed.bin&#x27;</span><br><span class="line">    decompressed_file = &#x27;decompressed.txt&#x27;</span><br><span class="line"></span><br><span class="line">    # 解压缩文件</span><br><span class="line">    decompress(compressed_file, decompressed_file)</span><br></pre></td></tr></table></figure>
+    <title>内存取证初识</title>
+    <url>/2023/09/29/%E5%8F%96%E8%AF%81%EF%BC%881%EF%BC%89%E5%86%85%E5%AD%98%E5%8F%96%E8%AF%81%E5%88%9D%E8%AF%86/</url>
+    <content><![CDATA[<h1 id="内存取证"><a href="#内存取证" class="headerlink" title="内存取证"></a>内存取证</h1><p>&emsp;&emsp;内存取证是指在计算机系统的内存中进行取证分析，以获取有关计算机系统当前状态的信息。内存取证通常用于分析计算机系统上运行的进程、网络连接、文件、注册表等信息，并可以用于检测和分析恶意软件、网络攻击和其他安全事件</p>
+<h2 id="Volatility"><a href="#Volatility" class="headerlink" title="Volatility"></a>Volatility</h2><p>&emsp;&emsp;Volatility是一款开源的内存分析框架，主要用于从计算机内存中提取数字证据。它可以用于取证、恶意代码分析、漏洞研究、操作系统学习以及其他安全领域</p>
+<h3 id="基本命令使用格式"><a href="#基本命令使用格式" class="headerlink" title="基本命令使用格式"></a>基本命令使用格式</h3><pre><code>python vol.py -f [image] ‐-profile=[profile][plugin] 命令
 
-<p><img src="https://s2.loli.net/2023/09/29/o5xBwTz7MJUCFi2.png"></p>
-<h3 id="小叮弹钢琴"><a href="#小叮弹钢琴" class="headerlink" title="小叮弹钢琴"></a>小叮弹钢琴</h3><p>首先给的一段音频，用Au打开，发现包含两个内容，一个明显是十六制数字，另外一个怀疑是摩斯密码，手写下来解码得到一段明文</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YOUSHOULDUSETHISTOXORSOMETHING</span><br></pre></td></tr></table></figure>
-
-<p>根据提示，考虑异或解密，手搓了一段脚本</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cipher_text_hex = &quot;0x370a05303c290e045005031c2b1858473a5f052117032c39230f005d1e17&quot;</span><br><span class="line">cipher_text_bytes = bytes.fromhex(cipher_text_hex[2:])</span><br><span class="line">key = &quot;YOUSHOULDUSETHISTOXORSOMETHING&quot;</span><br><span class="line">key_bytes = key.encode()</span><br><span class="line">plain_text_bytes = bytearray(len(cipher_text_bytes))</span><br><span class="line"></span><br><span class="line">for i in range(len(cipher_text_bytes)):</span><br><span class="line">    plain_text_bytes[i] = cipher_text_bytes[i] ^ key_bytes[i % len(key_bytes)]</span><br><span class="line"></span><br><span class="line">decrypted_text = plain_text_bytes.decode()</span><br><span class="line"></span><br><span class="line">print(&quot;Decrypted Text:&quot;, decrypted_text)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>但是解下来出现了nep字样，但是字符不对劲</p>
-<p><img src="https://s2.loli.net/2023/09/29/FoR42QkXEf7JsSh.png"></p>
-<p>然后用CyberChef一把梭，得到了结果</p>
-<p><img src="https://s2.loli.net/2023/09/29/DpPRqJvEW8SImNB.png"></p>
-<p>应该是脚本存在问题，但是代码能力有限，真想不出来了，等赛后wp吧</p>
-<h3 id="codes"><a href="#codes" class="headerlink" title="codes"></a>codes</h3><p>根据提示，flag在环境变量中</p>
-<p>根据查找，有一下几种方法</p>
+其中 -f 后面加的是要取证的文件， --profile 后加的是工具识别出的系统版本， [plugin] 是指使用的插件，其中默认存在一些插件，另外还可以自己下载一些插件扩充
+</code></pre>
+<p><img src="https://s2.loli.net/2023/09/29/BHWkJuCXGl4ODg9.png"><br>使用<code>python vol.py -h </code>命令可查看基本的使用帮助</p>
+<h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p>&emsp;&emsp;内存取证的流程简要概况就是以下几步：解析Windows&#x2F;Linux&#x2F;Mac OS的内存结构、分析进程等内存数据、根据题目提示寻找线索和思路，提取分析指定进程的特定内存数据.<br>&emsp;&emsp;识别常用文件名后缀，如raw文件、vmem文件、img文件、dmp文件等内存镜像文件</p>
+<pre><code>volatility -f [] imageinfo 
+[]中添加文件名
+</code></pre>
+<p>&emsp;&emsp;用该命令查看基本信息，根据查到的信息确定profile的值<br>剩下的基本流程可以推荐看一下<a href="https://cloud.tencent.com/developer/article/1419462" title="volatility">这篇博客</a></p>
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><ul>
+<li>amcache        	查看AmCache应用程序痕迹信息</li>
+<li>apihooks       	检测内核及进程的内存空间中的API hook</li>
+<li>atoms          	列出会话及窗口站atom表</li>
+<li>atomscan       	Atom表的池扫描(Pool scanner)</li>
+<li>auditpol       	列出注册表HKLMSECURITYPolicyPolAdtEv的审计策略信息</li>
+<li>bigpools       	使用BigPagePoolScanner转储大分页池(big page pools)</li>
+<li>bioskbd        	从实时模式内存中读取键盘缓冲数据(早期电脑可以读取出BIOS开机密码)</li>
+<li>cachedump      	获取内存中缓存的域帐号的密码哈希</li>
+<li>callbacks      	打印全系统通知例程</li>
+<li>clipboard      	提取Windows剪贴板中的内容</li>
+<li>cmdline        	显示进程命令行参数</li>
+<li>cmdscan        	提取执行的命令行历史记录（扫描 COMMAND HISTORY信息）</li>
+<li>connections    	打印系统打开的网络连接(仅支持Windows XP 和2003)</li>
+<li>connscan       	打印TCP连接信息</li>
+<li>consoles       	提取执行的命令行历史记录（扫描 CONSOLE INFORMATION信息）</li>
+<li>crashinfo      	提取崩溃转储信息</li>
+<li>deskscan       	tagDESKTOP池扫描(Poolscaner)</li>
+<li>devicetree     	显示设备树信息</li>
+<li>dlldump        	从进程地址空间转储动态链接库</li>
+<li>dlllist        	打印每个进程加载的动态链接库列表</li>
+<li>driverirp      	IRP hook驱动检测</li>
+<li>drivermodule   	关联驱动对象至内核模块</li>
+<li>driverscan     	驱动对象池扫描</li>
+<li>dumpcerts      	提取RAS私钥及SSL公钥</li>
+<li><strong>dumpfiles      	提取内存中映射或缓存的文件</strong></li>
+<li>dumpregistry   	转储内存中注册表信息至磁盘</li>
+<li>editbox        	查看Edit编辑控件信息 (Listbox正在实验中)</li>
+<li><strong>envars         	显示进程的环境变量</strong></li>
+<li>eventhooks     	打印Windows事件hook详细信息</li>
+<li>evtlogs        	提取Windows事件日志（仅支持XP&#x2F;2003)</li>
+<li><strong>filescan       	提取文件对象（file objects）池信息</strong></li>
+<li>gahti          	转储用户句柄（handle）类型信息</li>
+<li>gditimers      	打印已安装的GDI计时器(timers)及回调(callbacks)</li>
+<li>gdt            	显示全局描述符表(Global Deor Table)</li>
+<li>getservicesids 	获取注册表中的服务名称并返回SID信息</li>
+<li>getsids        	打印每个进程的SID信息</li>
+<li>handles        	打印每个进程打开的句柄的列表</li>
+<li><strong>hashdump       	转储内存中的Windows帐户密码哈希(LM&#x2F;NTLM)</strong></li>
+<li>hibinfo        	转储休眠文件信息</li>
+<li><strong>hivedump       	打印注册表配置单元信息</strong></li>
+<li><strong>hivelist       	打印注册表配置单元列表</strong></li>
+<li>hivescan       	注册表配置单元池扫描</li>
+<li>hpakextract    	从HPAK文件（Fast Dump格式）提取物理内存数据</li>
+<li>hpakinfo       	查看HPAK文件属性及相关信息</li>
+<li>idt            	显示中断描述符表(Interrupt Deor Table)</li>
+<li><strong>iehistory      	重建IE缓存及访问历史记录</strong></li>
+<li>imagecopy      	将物理地址空间导出原生DD镜像文件</li>
+<li>imageinfo      	查看&#x2F;识别镜像信息</li>
+<li>impscan        	扫描对导入函数的调用</li>
+<li>joblinks       	打印进程任务链接信息</li>
+<li>kdbgscan       	搜索和转储潜在KDBG值</li>
+<li>kpcrscan       	搜索和转储潜在KPCR值</li>
+<li>ldrmodules     	检测未链接的动态链接DLL</li>
+<li>lsadump        	从注册表中提取LSA密钥信息（已解密）</li>
+<li>machoinfo      	转储Mach-O 文件格式信息</li>
+<li>malfind        	查找隐藏的和插入的代码</li>
+<li>mbrparser      	扫描并解析潜在的主引导记录(MBR)</li>
+<li><strong>memdump        	转储进程的可寻址内存</strong></li>
+<li>memmap         	打印内存映射</li>
+<li>messagehooks   	桌面和窗口消息钩子的线程列表</li>
+<li>mftparser      	扫描并解析潜在的MFT条目</li>
+<li>moddump        	转储内核驱动程序到可执行文件的示例</li>
+<li>modscan        	内核模块池扫描</li>
+<li>modules        	打印加载模块的列表</li>
+<li>multiscan      	批量扫描各种对象</li>
+<li>mutantscan     	对互斥对象池扫描</li>
+<li><strong>notepad        	查看记事本当前显示的文本</strong></li>
+<li><strong>netscan           查看命令行操作</strong></li>
+<li>objtypescan    	扫描窗口对象类型对象</li>
+<li>patcher        	基于页面扫描的补丁程序内存</li>
+<li>poolpeek       	可配置的池扫描器插件</li>
+<li><strong>printkey       	打印注册表项及其子项和值</strong></li>
+<li>privs          	显示进程权限</li>
+<li>procdump       	进程转储到一个可执行文件示例</li>
+<li><strong>pslist         	按照EPROCESS列表打印所有正在运行的进程</strong></li>
+<li>psscan         	进程对象池扫描</li>
+<li>pstree         	以树型方式打印进程列表</li>
+<li>psxview        	查找带有隐藏进程的所有进程列表</li>
+<li>qemuinfo       	转储 Qemu 信息</li>
+<li>raw2dmp        	将物理内存原生数据转换为windbg崩溃转储格式</li>
+<li><strong>screenshot     	基于GDI Windows的虚拟屏幕截图保存</strong></li>
+<li>servicediff    	Windows服务列表(ala Plugx)</li>
+<li>sessions       	_MM_SESSION_SPACE的详细信息列表(用户登录会话)</li>
+<li>shellbags      	打印Shellbags信息</li>
+<li>shimcache      	解析应用程序兼容性Shim缓存注册表项</li>
+<li>shutdowntime   	从内存中的注册表信息获取机器关机时间</li>
+<li>sockets        	打印已打开套接字列表</li>
+<li>sockscan       	TCP套接字对象池扫描</li>
+<li>ssdt           	显示SSDT条目</li>
+<li>strings        	物理到虚拟地址的偏移匹配(需要一些时间，带详细信息)</li>
+<li><strong>svcscan        	Windows服务列表扫描</strong></li>
+<li>symlinkscan    	符号链接对象池扫描</li>
+<li>thrdscan       	线程对象池扫描</li>
+<li>threads        	调查_ETHREAD 和_KTHREADs</li>
+<li><strong>timeliner      	创建内存中的各种痕迹信息的时间线</strong></li>
+<li>timers         	打印内核计时器及关联模块的DPC</li>
+<li>truecryptmaster	Recover 	恢复TrueCrypt 7.1a主密钥</li>
+<li>truecryptpassphrase		查找并提取TrueCrypt密码</li>
+<li>truecryptsummary	TrueCrypt摘要信息</li>
+<li>unloadedmodules	打印卸载的模块信息列表</li>
+<li><strong>userassist     	打印注册表中UserAssist相关信息</strong></li>
+<li>userhandles    	转储用户句柄表</li>
+<li>vaddump        	转储VAD数据为文件</li>
+<li>vadinfo        	转储VAD信息</li>
+<li>vadtree        	以树形方式显示VAD树信息</li>
+<li>vadwalk        	显示遍历VAD树</li>
+<li>vboxinfo       	转储Virtualbox信息（虚拟机）</li>
+<li>verinfo        	打印PE镜像中的版本信息</li>
+<li>vmwareinfo     	转储VMware VMSS&#x2F;VMSN 信息</li>
+<li>volshell       	内存镜像中的shell</li>
+<li>windows        	打印桌面窗口(详细信息)</li>
+<li>wintree        	Z顺序打印桌面窗口树</li>
+<li>wndscan        	池扫描窗口站</li>
+<li>yarascan       	以Yara签名扫描进程或内核内存</li>
+</ul>
+<h2 id="其他工具"><a href="#其他工具" class="headerlink" title="其他工具"></a>其他工具</h2><h3 id="Dumplt"><a href="#Dumplt" class="headerlink" title="Dumplt"></a>Dumplt</h3><p>&emsp;&emsp;利用Dumplt可以将一个系统的完整内存镜像dump下来，dumplt制作的内存镜像(raw文件)与系统内存接近<br><img src="https://s2.loli.net/2023/09/29/QpI85BzeqYLk27K.png"></p>
+<h3 id="AccessData-FTK-Imager"><a href="#AccessData-FTK-Imager" class="headerlink" title="AccessData FTK Imager"></a>AccessData FTK Imager</h3><p><strong>主要功能</strong>：</p>
 <ol>
-<li><p><strong>使用 <code>extern char **environ</code> 全局变量：</strong></p>
-<p>这是一种直接的方法，使用全局变量 <code>environ</code>，它是一个指向指针的指针，用于存储环境变量的字符串数组。遍历这个数组并打印环境变量的值。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (environ[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, environ[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<li><p>证据获取</p>
 </li>
-<li><p><strong>使用 <code>getenv()</code> 函数：</strong></p>
-<p><code>getenv()</code> 函数允许你通过指定环境变量名称来获取其值。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* env_var_name = <span class="string">&quot;PATH&quot;</span>;</span><br><span class="line">    <span class="type">char</span>* env_var_value = getenv(env_var_name);</span><br><span class="line">    <span class="keyword">if</span> (env_var_value != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s=%s\n&quot;</span>, env_var_name, env_var_value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Environment variable &#x27;%s&#x27; not found.\n&quot;</span>, env_var_name);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<li><p>哈希值计算</p>
 </li>
-<li><p><strong>使用 <code>main()</code> 函数的参数 <code>char *argv[]</code>：</strong></p>
-<p>程序的启动参数中也包含了环境变量信息。这种方法需要一些额外的解析工作。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[], <span class="type">char</span> *envp[])</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (envp[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, envp[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>文件查看及提取</p>
+</li>
+<li><p>镜像文件挂载</p>
+</li>
+<li><p>数据恢复</p>
+</li>
+<li><p>特定数据提取</p>
+<p><img src="https://s2.loli.net/2023/09/29/1AIFx76qMDn4aev.png"></p>
+</li>
 </ol>
-<p>逐个尝试，全部失败了</p>
-<p>开始尝试各种绕过姿势</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">extern char **en\</span><br><span class="line">viron;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">    int i = 0;</span><br><span class="line">    while (en\</span><br><span class="line">viron[i] != NULL) &#123;</span><br><span class="line">        printf(&quot;%s\n&quot;, en\</span><br><span class="line">viron[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>最终得到flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Nepctf&#123;easy_codes_3a5786c2-dd96-46bd-9909-23f894dc8d2a_[TEAM_HASH]&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="ConnectedFive"><a href="#ConnectedFive" class="headerlink" title="ConnectedFive"></a>ConnectedFive</h3><p><img src="https://s2.loli.net/2023/09/29/DIuOpeSJkYsTxWf.png"></p>
-<p>万宁，果真折磨</p>
-<h3 id="陌生的语言"><a href="#陌生的语言" class="headerlink" title="陌生的语言"></a>陌生的语言</h3><p>没啥好说的，上图，比较好奇出题人到底是怎么找到的这个图</p>
-<p><img src="https://s2.loli.net/2023/09/29/ifCgDS2O9Jzdw1y.jpg"></p>
-<p><img src="https://s2.loli.net/2023/09/29/wofOdTlQaR38XpE.png"></p>
-<p>然后将对应一下，最终成功提交上去的flag为</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NepCTF&#123;NEPNEP_A_BELIEVING_HEART_IS_YOUR_MAGIC&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="你也喜欢三月七么"><a href="#你也喜欢三月七么" class="headerlink" title="你也喜欢三月七么"></a>你也喜欢三月七么</h3><p>拿到手刚开始以为这个题是密码的，当然，也确实有部分是，但主要可能是考察阅读理解。我还想再说一句，星穹铁道，启动！</p>
-<p>首先先来看一下附件给了我们什么内容</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">salt_lenth= 10 </span><br><span class="line">key_lenth= 16 </span><br><span class="line">iv= 88219bdee9c396eca3c637c0ea436058 #原始iv转hex的值</span><br><span class="line">ciphertext= b700ae6d0cc979a4401f3dd440bf9703b292b57b6a16b79ade01af58025707fbc29941105d7f50f2657cf7eac735a800ecccdfd42bf6c6ce3b00c8734bf500c819e99e074f481dbece626ccc2f6e0562a81fe84e5dd9750f5a0bb7c20460577547d3255ba636402d6db8777e0c5a429d07a821bf7f9e0186e591dfcfb3bfedfc</span><br></pre></td></tr></table></figure>
-
-<p>第一个是salt的长度，第二个是key的长度，第三个是偏移量iv，第四个就是相对应的密文了</p>
-<p>其次，来分析一下题目给的提示</p>
-<p><u><strong>三月七：耶，终于来到Nepnep星球啦，让我看看正在火热进行的Hacker夺旗大赛群聊。啊！开拓者，这群名看起来怪怪的诶。 （伸出脑袋，凑近群名，轻轻的闻了一下）哇，好咸诶，开拓者你快来看看！</strong></u></p>
-<p><u><strong>开拓者（U_id）：(端着下巴，磨蹭了一下，眼神若有所思）这好像需要经过啥256处理一下才能得到我们需要的关键。</strong></u></p>
-<p>第一次阅读的时候我的关注点就是再256和群名两个关键上，256是指向hash算法，群名自然是跟附件中没有给出的key（PS：题目中关键的英文也是key）有关。</p>
-<p>但是我刚开始完全没有注意到一个长度的问题，也就是salt_lenth&#x3D; 10 和key_lenth&#x3D; 16，而是将NepCTF 2023直接哈希计算了，中间留了空格（PS：因为我看群名也是留了空格的），甚至因为存在salt这个量还在考虑是否算法还进行了变种，然后尝试aes解密失败了。后来又从题目里的关键提示，也就是三月七闻群名好咸，咸指的自然就是盐，而盐的英文是salt。意识到这一点，也就开始知道为什么给出了两个长度值了salt的长度是提示使用NepCTF2023（PS:不加空格，刚好十个字），然后开始计算哈希256，得到的是</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dd8e671df3882c5be6423cd030bd7cb69671ef27dfe7a541903edc4e23168009</span><br></pre></td></tr></table></figure>
-
-<p>但是长度是32个字节，所以需要截取出一半作为key，具体代码实现如下</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">from Crypto.Cipher import AES</span><br><span class="line">import binascii</span><br><span class="line"></span><br><span class="line">*#* *提供的信息</span><br><span class="line">*key_hex = &quot;dd8e671df3882c5be6423cd030bd7cb6&quot;</span><br><span class="line">iv_hex = &quot;88219bdee9c396eca3c637c0ea436058&quot;</span><br><span class="line">ciphertext_hex = &quot;b700ae6d0cc979a4401f3dd440bf9703b292b57b6a16b79ade01af58025707fbc29941105d7f50f2657cf7eac735a800ecccdfd42bf6c6ce3b00c8734bf500c819e99e074f481dbece626ccc2f6e0562a81fe84e5dd9750f5a0bb7c20460577547d3255ba636402d6db8777e0c5a429d07a821bf7f9e0186e591dfcfb3bfedfc&quot;</span><br><span class="line"></span><br><span class="line">*#* *将十六进制的**key**、**iv**和**ciphertext**转换为字节串</span><br><span class="line">*key = binascii.unhexlify(key_hex)</span><br><span class="line">iv = binascii.unhexlify(iv_hex)</span><br><span class="line">ciphertext = binascii.unhexlify(ciphertext_hex)</span><br><span class="line"></span><br><span class="line">*#* *创建**AES**解密器对象</span><br><span class="line">*cipher = AES.new(key, AES.MODE_CBC, iv)</span><br><span class="line"></span><br><span class="line">*#* *解密数据</span><br><span class="line">*decrypted_data = cipher.decrypt(ciphertext)</span><br><span class="line"></span><br><span class="line">*#* *将解密后的字节数据转换为字符串</span><br><span class="line">*decrypted_string = decrypted_data.decode(&#x27;utf-8&#x27;)</span><br><span class="line"></span><br><span class="line">*#* *打印解密后的字符串</span><br><span class="line">*print(decrypted_string)</span><br></pre></td></tr></table></figure>
-
-<p>最终计算下来结果为一串十六进制</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6148523063484d364c793970625763784c6d6c745a3352774c6d4e76625338794d44497a4c7a41334c7a49304c336c5061316858553070554c6e42755a773d3d</span><br></pre></td></tr></table></figure>
-
-<p>然后转字符，转base64得到网址</p>
-<p><strong><a href="https://img1.imgtp.com/2023/07/24/yOkXWSJT.png">https://img1.imgtp.com/2023/07/24/yOkXWSJT.png</a></strong></p>
-<p>下载下来一张图片</p>
-<p><img src="https://s2.loli.net/2023/09/29/8eWuRQc2y3htlYi.png"></p>
-<p>然后第一反应识图，结果google继陌生的语言后又失效喽（悲</p>
-<p>后来又想到题目一开始就有了提示，星穹铁道，然后搜索相关的文字，找到了贝洛伯格特殊文字</p>
-<p><img src="https://s2.loli.net/2023/09/29/biMX7Bx8CuJwScr.jpg"></p>
-<p>然后跟表对照得到最终的flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">NepCTF&#123;HRP_aIways_likes_March_7th&#125;</span><br></pre></td></tr></table></figure>
-
-<p>(PS:做图文题做到够，麻了)</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>下载得到附件，为一个dump文件  </p>
+<p>先查看dump文件的profile值</p>
+<p>  <img src="https://s2.loli.net/2023/09/29/ugQZbrV7NXh1OmH.png"><br>展示进程</p>
+<p><img src="https://s2.loli.net/2023/09/29/h9SrAwkclRofWxb.png" alt="https://s2.loli.net/2023/09/29/h9SrAwkclRofWxb.png">  </p>
+<p>查看cmd命令，得知存在文件flag.ccx </p>
+<p><img src="https://s2.loli.net/2023/09/29/k6TmBaQqoZ1sFAP.png" alt="https://s2.loli.net/2023/09/29/k6TmBaQqoZ1sFAP.png">  </p>
+<p>寻找flag.ccx文件，文件地址为0x3e435890</p>
+<p><img src="https://s2.loli.net/2023/09/29/UVYw1xR4zDvMXF9.png" alt="https://s2.loli.net/2023/09/29/UVYw1xR4zDvMXF9.png">  </p>
+<p>dump文件</p>
+<p><img src="https://s2.loli.net/2023/09/29/2zay3veYw6dHTRq.png" alt="https://s2.loli.net/2023/09/29/2zay3veYw6dHTRq.png">  </p>
+<p>寻找administrator的密码,列出SAM表的用户</p>
+<p><img src="https://s2.loli.net/2023/09/29/fZeWzEJa6hiyDKO.png" alt="https://s2.loli.net/2023/09/29/fZeWzEJa6hiyDKO.png">  </p>
+<p>获取SYSTEM SAM的虚拟地址,分别为0xfffff8a000024010  0xfffff8a001590010</p>
+<p><img src="https://s2.loli.net/2023/09/29/dnEe5ZkHKsqxc8C.png" alt="https://s2.loli.net/2023/09/29/dnEe5ZkHKsqxc8C.png">  </p>
+<p>hashdump获取用户密码的hash值</p>
+<p><img src="https://s2.loli.net/2023/09/29/9T8dgItXK5NsLaH.png" alt="https://s2.loli.net/2023/09/29/9T8dgItXK5NsLaH.png">  </p>
+<p>CMD5查询hash值得到Administrator账户的密码</p>
+<p><img src="https://s2.loli.net/2023/09/29/VCKkj4bSzgXrJ3B.png" alt="https://s2.loli.net/2023/09/29/VCKkj4bSzgXrJ3B.png">  </p>
+<p>CnCrypt加载得到flag,密码为ABCabc123  </p>
 ]]></content>
       <categories>
-        <category>Writeup</category>
+        <category>取证</category>
       </categories>
       <tags>
-        <tag>NepNep</tag>
+        <tag>内存取证</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>暴力破解</title>
+    <url>/2023/09/30/Web%EF%BC%881%EF%BC%89%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
+    <content><![CDATA[<h1 id="暴力破解"><a href="#暴力破解" class="headerlink" title="暴力破解"></a>暴力破解</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>暴力破解漏洞是指黑客或攻击者利用计算机程序或脚本通过尝试所有可能的组合，来暴力破解系统、应用程序或网络的安全漏洞。这种攻击方法的目标通常是弱密码或不安全的加密算法。</p>
+<p>暴力破解攻击的原理是，攻击者通过不断尝试可能的密码、密钥或其他安全参数，直到找到正确的组合为止。这种攻击方法虽然简单直接，但效率较低，因为它需要尝试大量可能性，特别是在密码复杂度较高或密钥空间较大的情况下。</p>
+<ul>
+<li><p>是否要求用户设置了复杂的密码</p>
+</li>
+<li><p>是否对每次认证都采用了安全的验证码</p>
+</li>
+<li><p>是否对尝试登陆的行为进行判断和限制</p>
+</li>
+<li><p>是否在必要的情况下采用了双因素验证</p>
+<p>········</p>
+</li>
+</ul>
+<h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><ol>
+<li>确认登陆接口的脆弱性</li>
+<li>对字典进行优化</li>
+<li>工具自动化操作</li>
+</ol>
+<h3 id="技巧一"><a href="#技巧一" class="headerlink" title="技巧一"></a>技巧一</h3><p>根据注册信息优化</p>
+<p>如要求密码位数，字母数字组合</p>
+<h3 id="技巧二"><a href="#技巧二" class="headerlink" title="技巧二"></a>技巧二</h3><p>爆破管理后台常用admin&#x2F;administrator&#x2F;root</p>
+<p>如输入admin&#x2F;xxx，显示密码错误，则确定用户名为admin</p>
+<h2 id="环境—-pikachu"><a href="#环境—-pikachu" class="headerlink" title="环境—-pikachu"></a>环境—-pikachu</h2><h3 id="基于表单的暴力破解"><a href="#基于表单的暴力破解" class="headerlink" title="基于表单的暴力破解"></a>基于表单的暴力破解</h3><p>基本就是利用直接手中的字典去进行撞库，以达到获取登陆密码的目的</p>
+<h4 id="要点一"><a href="#要点一" class="headerlink" title="要点一"></a>要点一</h4><p>payload的设置，可考虑之前所说的基本技巧去缩小payload的范围，节省时间。</p>
+<h4 id="要点二"><a href="#要点二" class="headerlink" title="要点二"></a>要点二</h4><p>注意以下四个在不同情况下的使用</p>
+<ul>
+<li><h5 id="Sniper"><a href="#Sniper" class="headerlink" title="Sniper"></a>Sniper</h5></li>
+<li><h5 id="Battering-ram"><a href="#Battering-ram" class="headerlink" title="Battering  ram"></a>Battering  ram</h5></li>
+<li><h5 id="Pitchfork"><a href="#Pitchfork" class="headerlink" title="Pitchfork"></a>Pitchfork</h5></li>
+<li><h5 id="Clusterbomb"><a href="#Clusterbomb" class="headerlink" title="Clusterbomb"></a>Clusterbomb</h5></li>
+</ul>
+<h4 id="要点三"><a href="#要点三" class="headerlink" title="要点三"></a>要点三</h4><p>检索匹配，得到不同的反应以确认正确的用户名与密码</p>
+<p><img src="https://s2.loli.net/2023/09/30/9mK78p2husDXWdk.png" alt="1"></p>
+<p>还可以根据返回包的数据长度去进行判断</p>
+<h3 id="验证码绕过-on-server"><a href="#验证码绕过-on-server" class="headerlink" title="验证码绕过(on server)"></a>验证码绕过(on server)</h3><p>例如验证码并没有设置过期期限，导致可以长期使用，使用同一个验证码反复登陆。</p>
+<p><img src="https://s2.loli.net/2023/09/30/sZYHJXdL4hcxmCz.png" alt="4"></p>
+<p><img src="https://s2.loli.net/2023/09/30/UgziedAs8jkn1tp.png" alt="5"></p>
+<p><img src="https://s2.loli.net/2023/09/30/rPK9lSyAgRLcTwu.png" alt="6"></p>
+<p><img src="https://s2.loli.net/2023/09/30/C13lMmbr8DYQdgz.png" alt="7"></p>
+<h4 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h4><ol>
+<li>验证码在后台不过期，导致可以长期使用</li>
+<li>验证码校验不合格，逻辑出现问题</li>
+<li>验证码设计的太过简单和有规律，容易被猜解</li>
+</ol>
+<h3 id="验证码绕过-on-client"><a href="#验证码绕过-on-client" class="headerlink" title="验证码绕过(on client)"></a>验证码绕过(on client)</h3><p>由于将验证码写在前端，导致实际验证码并没有起到验证的效果，仍然可以撞库获取账户密码。</p>
+<p>例如：在抓到的包中修改验证码为无，返回的包中并没有出现验证码错误的返回，而是出现正常的用户名和密码错误，说明验证码并没有起到防范的效果。</p>
+<p><img src="https://s2.loli.net/2023/09/30/D7zmrOe52UKVATS.png" alt="2"></p>
+<p><img src="https://s2.loli.net/2023/09/30/nXxyv8lteSZrM7G.png" alt="3"></p>
+<h4 id="常见问题-1"><a href="#常见问题-1" class="headerlink" title="常见问题"></a>常见问题</h4><ul>
+<li>使用前端js实现验证码</li>
+<li>将验证码在cookie中泄露</li>
+<li>将验证码在前端源代码中泄露，容易被获取</li>
+</ul>
+<h3 id="token防爆破"><a href="#token防爆破" class="headerlink" title="token防爆破?"></a>token防爆破?</h3><h2 id="防范措施"><a href="#防范措施" class="headerlink" title="防范措施"></a>防范措施</h2><ul>
+<li>设计安全的验证码</li>
+<li>对认证错误的提交进行计数并给出限制，比如连续五次密码错误，锁定两小时</li>
+<li>必要的情况下，使用双因素认证</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>暴力破解</tag>
       </tags>
   </entry>
   <entry>
@@ -1075,238 +1144,6 @@
 <h3 id="输出-2"><a href="#输出-2" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">***</span><br><span class="line">***</span><br><span class="line">***</span><br></pre></td></tr></table></figure>
 
 <h3 id="代码-9"><a href="#代码-9" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> ch;</span><br><span class="line">    <span class="comment">// 读取输入字符</span></span><br><span class="line">    cin &gt;&gt; ch;</span><br><span class="line">    <span class="comment">// 打印字符正方形</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; ++i) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">3</span>; ++j) &#123;</span><br><span class="line">            cout &lt;&lt; ch;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>程序设计基础习题</category>
-      </categories>
-      <tags>
-        <tag>程序设计基础</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>程序设计基础(4)-选择结构1(单分支和双分支)</title>
-    <url>/2023/09/28/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80(4)-%E9%80%89%E6%8B%A9%E7%BB%93%E6%9E%841(%E5%8D%95%E5%88%86%E6%94%AF%E5%92%8C%E5%8F%8C%E5%88%86%E6%94%AF)/</url>
-    <content><![CDATA[<h1 id="程序设计基础-4-选择结构1-单分支和双分支"><a href="#程序设计基础-4-选择结构1-单分支和双分支" class="headerlink" title="程序设计基础(4)-选择结构1(单分支和双分支)"></a>程序设计基础(4)-选择结构1(单分支和双分支)</h1><h2 id="题目名称-A-你是天才吗？"><a href="#题目名称-A-你是天才吗？" class="headerlink" title="题目名称:A-你是天才吗？"></a>题目名称:A-你是天才吗？</h2><h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>据说智商140以上者称为天才，KiKi想知道他自己是不是天才，请帮他编程判断。输入一个整数表示一个人的智商，如果大于等于140，则表明他是一个天才，输出“Genius”。</p>
-<h3 id="输入描述"><a href="#输入描述" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数表示的智商。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述"><a href="#输出描述" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果大于等于140，则表明他是一个天才，输出“Genius”，否则不输出。                 </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">160</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Genius</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> IQ; <span class="comment">// 声明一个整数变量来存储智商</span></span><br><span class="line">    cin &gt;&gt; IQ; <span class="comment">// 从标准输入读取智商值</span></span><br><span class="line">    <span class="comment">// 判断智商是否大于等于140</span></span><br><span class="line">    <span class="keyword">if</span> (IQ &gt;= <span class="number">140</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Genius&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-B-满分判断"><a href="#题目名称-B-满分判断" class="headerlink" title="题目名称:B-满分判断"></a>题目名称:B-满分判断</h2><h3 id="题目描述-1"><a href="#题目描述-1" class="headerlink" title="题目描述"></a>题目描述</h3><p>不及格学校的孩子们都想考试打一百分，输入一个成绩，请编程帮着判断是否得了一百分。</p>
-<h3 id="输入描述-1"><a href="#输入描述-1" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数n ( 0 ≤ n ≤ 100) </span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-1"><a href="#输出描述-1" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果输入的分数为100分，输出“Full marks!”</span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-1"><a href="#输入-1" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">100</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-1"><a href="#输出-1" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Full marks!</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score;</span><br><span class="line">    <span class="comment">// 读取分数</span></span><br><span class="line">    cin &gt;&gt; score;</span><br><span class="line">    <span class="comment">// 判断是否为100分</span></span><br><span class="line">    <span class="keyword">if</span> (score == <span class="number">100</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Full marks!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-C-6的倍数"><a href="#题目名称-C-6的倍数" class="headerlink" title="题目名称:C-6的倍数"></a>题目名称:C-6的倍数</h2><h3 id="题目描述-2"><a href="#题目描述-2" class="headerlink" title="题目描述"></a>题目描述</h3><p>乎乎喜欢的数字是6的倍数，如果是6的倍数，请编程帮他输出”Good Number!”。</p>
-<h3 id="输入描述-2"><a href="#输入描述-2" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-2"><a href="#输出描述-2" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是6的倍数，请输出&quot;Good Number!&quot;          </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-2"><a href="#输入-2" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">36</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-2"><a href="#输出-2" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Good Number!</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 判断是否是6的倍数</span></span><br><span class="line">    <span class="keyword">if</span> (num % <span class="number">6</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Good Number!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-D-奇数判断"><a href="#题目名称-D-奇数判断" class="headerlink" title="题目名称:D-奇数判断"></a>题目名称:D-奇数判断</h2><h3 id="题目描述-3"><a href="#题目描述-3" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入一个正整数n，判断他是不是奇数。</p>
-<h3 id="输入描述-3"><a href="#输入描述-3" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数n ( 1 ≤ n ≤ 1000)        </span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-3"><a href="#输出描述-3" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是奇数，输出信息详见样例，如果不是奇数，什么也不输出。                 </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-3"><a href="#输入-3" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-3"><a href="#输出-3" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">3 is odd.</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-3"><a href="#代码-3" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取正整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否为奇数</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> != <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; n &lt;&lt; <span class="string">&quot; is odd.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-E-完美成绩"><a href="#题目名称-E-完美成绩" class="headerlink" title="题目名称:E-完美成绩"></a>题目名称:E-完美成绩</h2><h3 id="题目描述-4"><a href="#题目描述-4" class="headerlink" title="题目描述"></a>题目描述</h3><p>  KiKi想知道他的考试成绩是否完美，请帮他判断。从键盘输入一个整数表示的成绩，编程判断成绩是否在90~100之间，如果是则输出“Perfect”。 </p>
-<h3 id="输入描述-4"><a href="#输入描述-4" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个整数表示的成绩（90~100）。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-4"><a href="#输出描述-4" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出“Perfect”。      </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-4"><a href="#输入-4" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">98</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-4"><a href="#输出-4" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Perfect</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-4"><a href="#代码-4" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score;</span><br><span class="line">    <span class="comment">// 读取成绩</span></span><br><span class="line">    cin &gt;&gt; score;</span><br><span class="line">    <span class="comment">// 判断成绩是否在90到100之间</span></span><br><span class="line">    <span class="keyword">if</span> (score &gt;= <span class="number">90</span> &amp;&amp; score &lt;= <span class="number">100</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Perfect&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-F-跳绳达人"><a href="#题目名称-F-跳绳达人" class="headerlink" title="题目名称:F-跳绳达人"></a>题目名称:F-跳绳达人</h2><h3 id="题目描述-5"><a href="#题目描述-5" class="headerlink" title="题目描述"></a>题目描述</h3><p>Kiki跳绳很厉害，他想知道自己是不是跳绳达人。输入一分钟跳绳的次数，若大于等于220次，输出“跳绳达人”，否则输出“继续努力”。</p>
-<h3 id="输入描述-5"><a href="#输入描述-5" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一分钟跳绳次数</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-5"><a href="#输出描述-5" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若大于等于220次，输出“跳绳达人”，否则输出“继续努力”。                      </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-5"><a href="#输入-5" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">240</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-5"><a href="#输出-5" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">跳绳达人</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-5"><a href="#代码-5" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> jumpCount;</span><br><span class="line">    <span class="comment">// 读取一分钟跳绳次数</span></span><br><span class="line">    cin &gt;&gt; jumpCount;</span><br><span class="line">    <span class="comment">// 判断是否为跳绳达人</span></span><br><span class="line">    <span class="keyword">if</span> (jumpCount &gt;= <span class="number">220</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;跳绳达人&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;继续努力&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-G-判断奇偶"><a href="#题目名称-G-判断奇偶" class="headerlink" title="题目名称:G-判断奇偶"></a>题目名称:G-判断奇偶</h2><h3 id="题目描述-6"><a href="#题目描述-6" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个整数n是奇数还是偶数,如果是奇数,输出”odd”, 否则输出”even”</p>
-<h3 id="输入描述-6"><a href="#输入描述-6" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数n（1 &lt;= n &lt;= 100）</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-6"><a href="#输出描述-6" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出odd或者even                </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-6"><a href="#输入-6" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-6"><a href="#输出-6" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">even</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-6"><a href="#代码-6" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断奇偶性</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;even&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;odd&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-H-环保打印"><a href="#题目名称-H-环保打印" class="headerlink" title="题目名称:H-环保打印"></a>题目名称:H-环保打印</h2><h3 id="题目描述-7"><a href="#题目描述-7" class="headerlink" title="题目描述"></a>题目描述</h3><p>​	ReRe上网课每天都需要打印老师留的作业，为了环保，她一般都用一张A4纸进行双面打印（既：正反面都打印作业），已知一份电子版的作业材料有n页，请帮ReRe计算一下至少需要几张A4纸？</p>
-<h3 id="输入描述-7"><a href="#输入描述-7" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数 n(0≤n≤20)，代表一份电子版的学习材料的页数。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-7"><a href="#输出描述-7" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">双面打印所需要的A4纸张数。              </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-7"><a href="#输入-7" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">4</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-7"><a href="#输出-7" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-7"><a href="#代码-7" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取材料页数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 计算所需A4纸张数</span></span><br><span class="line">    <span class="type">int</span> pages_needed = (n + <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">    cout &lt;&lt; pages_needed &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-I-被5整除问题"><a href="#题目名称-I-被5整除问题" class="headerlink" title="题目名称:I-被5整除问题"></a>题目名称:I-被5整除问题</h2><h3 id="题目描述-8"><a href="#题目描述-8" class="headerlink" title="题目描述"></a>题目描述</h3><p>  判断一个整数是否能5整除是一个挺简单的问题，懒惰的KiKi还是不想自己做，于是找到你帮他写代码，你就帮帮他吧。 </p>
-<h3 id="输入描述-8"><a href="#输入描述-8" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个整数M（1≤M≤100,000）。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-8"><a href="#输出描述-8" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出包括一行，如果M可以被5整除就输出YES，否则输出NO（结果大小写敏感）。            </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-8"><a href="#输入-8" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-8"><a href="#输出-8" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-8"><a href="#代码-8" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> M;</span><br><span class="line">    <span class="comment">// 读取整数M</span></span><br><span class="line">    cin &gt;&gt; M;</span><br><span class="line">    <span class="comment">// 判断是否能被5整除</span></span><br><span class="line">    <span class="keyword">if</span> (M % <span class="number">5</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-J-判断是否为两位数"><a href="#题目名称-J-判断是否为两位数" class="headerlink" title="题目名称:J-判断是否为两位数"></a>题目名称:J-判断是否为两位数</h2><h3 id="题目描述-9"><a href="#题目描述-9" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个正整数是否是两位数(即大于等于10且小于等于99)。若该正整数是两位数，输出1，否则输出0。</p>
-<h3 id="输入描述-9"><a href="#输入描述-9" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数，不超过1000。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-9"><a href="#输出描述-9" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，若该正整数是两位数，输出1，否则输出0。            </span><br></pre></td></tr></table></figure>
-
-<h2 id="输入-9"><a href="#输入-9" class="headerlink" title="输入"></a>输入</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">68</span><br></pre></td></tr></table></figure>
-
-<h2 id="输出-9"><a href="#输出-9" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-9"><a href="#代码-9" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取正整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否是两位数</span></span><br><span class="line">    <span class="keyword">if</span> (n &gt;= <span class="number">10</span> &amp;&amp; n &lt;= <span class="number">99</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;1&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;0&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-K-两个数中较大"><a href="#题目名称-K-两个数中较大" class="headerlink" title="题目名称:K-两个数中较大"></a>题目名称:K-两个数中较大</h2><h3 id="题目描述-10"><a href="#题目描述-10" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入两个整数，输出两个数中较大的。</p>
-<h3 id="输入描述-10"><a href="#输入描述-10" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入两个整数a, b(1 ≤ a, b ≤ 1000)，空格隔开。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-10"><a href="#输出描述-10" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a, b中较大的         </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-10"><a href="#输入-10" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">16 22</span><br></pre></td></tr></table></figure>
-
-<h2 id="输出-10"><a href="#输出-10" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">22</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-10"><a href="#代码-10" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a, b;</span><br><span class="line">    <span class="comment">// 读取两个整数</span></span><br><span class="line">    cin &gt;&gt; a &gt;&gt; b;</span><br><span class="line">    <span class="comment">// 判断并输出较大的数</span></span><br><span class="line">    <span class="keyword">if</span> (a &gt; b) &#123;</span><br><span class="line">        cout &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; b &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-L-编程达人"><a href="#题目名称-L-编程达人" class="headerlink" title="题目名称:L-编程达人"></a>题目名称:L-编程达人</h2><h3 id="题目描述-11"><a href="#题目描述-11" class="headerlink" title="题目描述"></a>题目描述</h3><p>ReRe努力学习编程，请编程帮她判断学习情况。 		</p>
-<h3 id="输入描述-11"><a href="#输入描述-11" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数表示2个小时完成编程的题目数目。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-11"><a href="#输出描述-11" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">根据2个小时完成编程的题目数目，若大于等于10道，输出“Super programmer!”，否则输出“Come on!”                    </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-11"><a href="#输入-11" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">20</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-11"><a href="#输出-11" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Super programmer!</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-11"><a href="#代码-11" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取题目数目</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 判断学习情况并输出</span></span><br><span class="line">    <span class="keyword">if</span> (num &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Super programmer!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Come on!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-M-比大小"><a href="#题目名称-M-比大小" class="headerlink" title="题目名称:M-比大小"></a>题目名称:M-比大小</h2><h3 id="题目描述-12"><a href="#题目描述-12" class="headerlink" title="题目描述"></a>题目描述</h3><p>  比较整数a和整数b的大小。 </p>
-<h3 id="输入描述-12"><a href="#输入描述-12" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行两个整数，由空格隔开，分别代表整数a、b的值</span><br><span class="line">(1&lt;=a,b&lt;=10000)</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-12"><a href="#输出描述-12" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若a比b小，输出&quot;&lt;&quot;</span><br><span class="line">若a与b相等，输出&quot;=&quot;</span><br><span class="line"></span><br><span class="line">若a比b大，输出&quot;&gt;&quot;</span><br><span class="line">实际输出中，不包含双引号       </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-12"><a href="#输入-12" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1 2</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-12"><a href="#输出-12" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-12"><a href="#代码-12" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a, b;</span><br><span class="line">    <span class="comment">// 读取两个整数</span></span><br><span class="line">    cin &gt;&gt; a &gt;&gt; b;</span><br><span class="line">    <span class="comment">// 比较大小并输出结果</span></span><br><span class="line">    <span class="keyword">if</span> (a &lt; b) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;&lt;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (a == b) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;=&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;&gt;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-N-牛妹数"><a href="#题目名称-N-牛妹数" class="headerlink" title="题目名称:N-牛妹数"></a>题目名称:N-牛妹数</h2><h3 id="题目描述-13"><a href="#题目描述-13" class="headerlink" title="题目描述"></a>题目描述</h3><p>  如果一个数是一个偶数而且大于50,我们称它为牛妹数 </p>
-<p>  给你一个数,判断它是否是牛妹数 </p>
-<h3 id="输入描述-13"><a href="#输入描述-13" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数n (1 &lt;= n &lt;= 100)</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-13"><a href="#输出描述-13" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是牛妹数,输出&quot;yes&quot;, 否则输出&quot;no&quot;                  </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-13"><a href="#输入-13" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">50</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-13"><a href="#输出-13" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">no</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-13"><a href="#代码-13" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否是牛妹数</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">0</span> &amp;&amp; n &gt; <span class="number">50</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;yes&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;no&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-O-判断一个数能否同时被3和5整除"><a href="#题目名称-O-判断一个数能否同时被3和5整除" class="headerlink" title="题目名称:O-判断一个数能否同时被3和5整除"></a>题目名称:O-判断一个数能否同时被3和5整除</h2><h3 id="题目描述-14"><a href="#题目描述-14" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个数n 能否同时被3和5整除，如果能同时被3和5整除输出YES，否则输出NO。 </p>
-<h3 id="输入描述-14"><a href="#输入描述-14" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行，包含一个整数n。（ -1,000,000 &lt; n &lt; 1,000,000）</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-14"><a href="#输出描述-14" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行，包含一个整数n。（ -1,000,000 &lt; n &lt; 1,000,000）                 </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-14"><a href="#输入-14" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">15</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-14"><a href="#输出-14" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-14"><a href="#代码-14" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否能同时被3和5整除</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">3</span> == <span class="number">0</span> &amp;&amp; n % <span class="number">5</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-P-判断字母"><a href="#题目名称-P-判断字母" class="headerlink" title="题目名称:P-判断字母"></a>题目名称:P-判断字母</h2><h3 id="题目描述-15"><a href="#题目描述-15" class="headerlink" title="题目描述"></a>题目描述</h3><p>从键盘任意输入一个字符，编程判断是否是字母（包括大小写）。</p>
-<h3 id="输入描述-15"><a href="#输入描述-15" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个字符。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-15"><a href="#输出描述-15" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出该字符是字母（YES）或不是（NO）。           </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-15"><a href="#输入-15" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">H</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-15"><a href="#输出-15" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-15"><a href="#代码-15" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> ch;</span><br><span class="line">    <span class="comment">// 读取字符</span></span><br><span class="line">    cin &gt;&gt; ch;</span><br><span class="line">    <span class="comment">// 判断是否是字母</span></span><br><span class="line">    <span class="keyword">if</span> ((ch &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; ch &lt;= <span class="string">&#x27;Z&#x27;</span>) || (ch &gt;= <span class="string">&#x27;a&#x27;</span> &amp;&amp; ch &lt;= <span class="string">&#x27;z&#x27;</span>)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-Q-KiKi的最高分"><a href="#题目名称-Q-KiKi的最高分" class="headerlink" title="题目名称:Q-KiKi的最高分"></a>题目名称:Q-KiKi的最高分</h2><h3 id="题目描述-16"><a href="#题目描述-16" class="headerlink" title="题目描述"></a>题目描述</h3><p>KiKi知道了大一三科比较重要课程的分数，包括：程序设计基础，高数，英语，请编程帮他找到三科中的最高分。</p>
-<h3 id="输入描述-16"><a href="#输入描述-16" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，三个整数，用空格分隔，代表三科成绩。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-16"><a href="#输出描述-16" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，一个整数，代表输入三科分数中的最高分数。               </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-16"><a href="#输入-16" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">90 88 99</span><br></pre></td></tr></table></figure>
-
-<h2 id="输出-16"><a href="#输出-16" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">99</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-16"><a href="#代码-16" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score1, score2, score3;</span><br><span class="line">    <span class="comment">// 读取三科成绩</span></span><br><span class="line">    cin &gt;&gt; score1 &gt;&gt; score2 &gt;&gt; score3;</span><br><span class="line">    <span class="comment">// 找到最高分数</span></span><br><span class="line">    <span class="type">int</span> maxScore = <span class="built_in">max</span>(<span class="built_in">max</span>(score1, score2), score3);</span><br><span class="line">    <span class="comment">// 输出最高分数</span></span><br><span class="line">    cout &lt;&lt; maxScore &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-R-判断输出"><a href="#题目名称-R-判断输出" class="headerlink" title="题目名称:R-判断输出"></a>题目名称:R-判断输出</h2><h3 id="题目描述-17"><a href="#题目描述-17" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入一个正整数，如果小于等于10就把这个整数输出。</p>
-<h3 id="输入描述-17"><a href="#输入描述-17" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数(1~1000)</span><br></pre></td></tr></table></figure>
-
-<h2 id="输出描述-17"><a href="#输出描述-17" class="headerlink" title="输出描述"></a>输出描述</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果小于等于10就把这个整数输出。                </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-17"><a href="#输入-17" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6</span><br></pre></td></tr></table></figure>
-
-<h2 id="输出-17"><a href="#输出-17" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-17"><a href="#代码-17" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取输入整数</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 如果小于等于10，就输出</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt;= <span class="number">10</span>) &#123;</span><br><span class="line">        cout &lt;&lt; num &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-S-计算y的值"><a href="#题目名称-S-计算y的值" class="headerlink" title="题目名称:S-计算y的值"></a>题目名称:S-计算y的值</h2><h3 id="题目描述-18"><a href="#题目描述-18" class="headerlink" title="题目描述"></a>题目描述</h3><p>  已知一个函数y&#x3D;f(x)，当x &lt; 0时，y &#x3D; 1；当x &#x3D; 0时，y &#x3D; 0；当x &gt; 0时，y &#x3D; -1。  </p>
-<h3 id="输入描述-18"><a href="#输入描述-18" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，输入一个整数x。（-10000&lt;x&lt;10000）</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-18"><a href="#输出描述-18" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，输出y的值。                        </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-18"><a href="#输入-18" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-18"><a href="#输出-18" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-18"><a href="#代码-18" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">    <span class="comment">// 读取输入整数</span></span><br><span class="line">    cin &gt;&gt; x;</span><br><span class="line">    <span class="comment">// 根据题目条件计算并输出y的值</span></span><br><span class="line">    <span class="type">int</span> y;</span><br><span class="line">    <span class="keyword">if</span> (x &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        y = <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (x == <span class="number">0</span>) &#123;</span><br><span class="line">        y = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        y = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; y &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="题目名称-T-有一门课不及格的学生"><a href="#题目名称-T-有一门课不及格的学生" class="headerlink" title="题目名称:T-有一门课不及格的学生"></a>题目名称:T-有一门课不及格的学生</h2><h3 id="题目描述-19"><a href="#题目描述-19" class="headerlink" title="题目描述"></a>题目描述</h3><p>​		给出一名学生的语文和数学成绩，判断他是否恰好有一门课不及格(成绩小于60分)。若该生恰好有一门课不及格，输出1；否则输出0。 </p>
-<h3 id="输入描述-19"><a href="#输入描述-19" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，包含两个在0到100之间的整数，分别是该生的语文成绩和数学成绩。</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出描述-19"><a href="#输出描述-19" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若该生恰好有一门课不及格，输出1；否则输出0。               </span><br></pre></td></tr></table></figure>
-
-<h3 id="输入-19"><a href="#输入-19" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">50 80</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出-19"><a href="#输出-19" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
-
-<h3 id="代码-19"><a href="#代码-19" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> chinese, math;</span><br><span class="line">    <span class="comment">// 读取输入的语文和数学成绩</span></span><br><span class="line">    cin &gt;&gt; chinese &gt;&gt; math;</span><br><span class="line">    <span class="comment">// 判断是否恰好有一门课不及格</span></span><br><span class="line">    <span class="keyword">if</span> ((chinese &lt; <span class="number">60</span> &amp;&amp; math &gt;= <span class="number">60</span>) || (chinese &gt;= <span class="number">60</span> &amp;&amp; math &lt; <span class="number">60</span>)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;1&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;0&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
@@ -1636,6 +1473,238 @@
 <h3 id="输出-24"><a href="#输出-24" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Tt</span><br></pre></td></tr></table></figure>
 
 <h3 id="代码-29"><a href="#代码-29" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取输入的序号n</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 计算对应的大写字母</span></span><br><span class="line">    <span class="type">char</span> uppercase = <span class="string">&#x27;A&#x27;</span> + (n - <span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 计算对应的小写字母</span></span><br><span class="line">    <span class="type">char</span> lowercase = <span class="string">&#x27;a&#x27;</span> + (n - <span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 输出对应的大写和小写字母</span></span><br><span class="line">    cout &lt;&lt; uppercase &lt;&lt; lowercase &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>程序设计基础习题</category>
+      </categories>
+      <tags>
+        <tag>程序设计基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>程序设计基础(4)-选择结构1(单分支和双分支)</title>
+    <url>/2023/09/28/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80(4)-%E9%80%89%E6%8B%A9%E7%BB%93%E6%9E%841(%E5%8D%95%E5%88%86%E6%94%AF%E5%92%8C%E5%8F%8C%E5%88%86%E6%94%AF)/</url>
+    <content><![CDATA[<h1 id="程序设计基础-4-选择结构1-单分支和双分支"><a href="#程序设计基础-4-选择结构1-单分支和双分支" class="headerlink" title="程序设计基础(4)-选择结构1(单分支和双分支)"></a>程序设计基础(4)-选择结构1(单分支和双分支)</h1><h2 id="题目名称-A-你是天才吗？"><a href="#题目名称-A-你是天才吗？" class="headerlink" title="题目名称:A-你是天才吗？"></a>题目名称:A-你是天才吗？</h2><h3 id="题目描述"><a href="#题目描述" class="headerlink" title="题目描述"></a>题目描述</h3><p>据说智商140以上者称为天才，KiKi想知道他自己是不是天才，请帮他编程判断。输入一个整数表示一个人的智商，如果大于等于140，则表明他是一个天才，输出“Genius”。</p>
+<h3 id="输入描述"><a href="#输入描述" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数表示的智商。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述"><a href="#输出描述" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果大于等于140，则表明他是一个天才，输出“Genius”，否则不输出。                 </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">160</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Genius</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> IQ; <span class="comment">// 声明一个整数变量来存储智商</span></span><br><span class="line">    cin &gt;&gt; IQ; <span class="comment">// 从标准输入读取智商值</span></span><br><span class="line">    <span class="comment">// 判断智商是否大于等于140</span></span><br><span class="line">    <span class="keyword">if</span> (IQ &gt;= <span class="number">140</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Genius&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-B-满分判断"><a href="#题目名称-B-满分判断" class="headerlink" title="题目名称:B-满分判断"></a>题目名称:B-满分判断</h2><h3 id="题目描述-1"><a href="#题目描述-1" class="headerlink" title="题目描述"></a>题目描述</h3><p>不及格学校的孩子们都想考试打一百分，输入一个成绩，请编程帮着判断是否得了一百分。</p>
+<h3 id="输入描述-1"><a href="#输入描述-1" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数n ( 0 ≤ n ≤ 100) </span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-1"><a href="#输出描述-1" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果输入的分数为100分，输出“Full marks!”</span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-1"><a href="#输入-1" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">100</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-1"><a href="#输出-1" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Full marks!</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score;</span><br><span class="line">    <span class="comment">// 读取分数</span></span><br><span class="line">    cin &gt;&gt; score;</span><br><span class="line">    <span class="comment">// 判断是否为100分</span></span><br><span class="line">    <span class="keyword">if</span> (score == <span class="number">100</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Full marks!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-C-6的倍数"><a href="#题目名称-C-6的倍数" class="headerlink" title="题目名称:C-6的倍数"></a>题目名称:C-6的倍数</h2><h3 id="题目描述-2"><a href="#题目描述-2" class="headerlink" title="题目描述"></a>题目描述</h3><p>乎乎喜欢的数字是6的倍数，如果是6的倍数，请编程帮他输出”Good Number!”。</p>
+<h3 id="输入描述-2"><a href="#输入描述-2" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-2"><a href="#输出描述-2" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是6的倍数，请输出&quot;Good Number!&quot;          </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-2"><a href="#输入-2" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">36</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-2"><a href="#输出-2" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Good Number!</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 判断是否是6的倍数</span></span><br><span class="line">    <span class="keyword">if</span> (num % <span class="number">6</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Good Number!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-D-奇数判断"><a href="#题目名称-D-奇数判断" class="headerlink" title="题目名称:D-奇数判断"></a>题目名称:D-奇数判断</h2><h3 id="题目描述-3"><a href="#题目描述-3" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入一个正整数n，判断他是不是奇数。</p>
+<h3 id="输入描述-3"><a href="#输入描述-3" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数n ( 1 ≤ n ≤ 1000)        </span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-3"><a href="#输出描述-3" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是奇数，输出信息详见样例，如果不是奇数，什么也不输出。                 </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-3"><a href="#输入-3" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-3"><a href="#输出-3" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">3 is odd.</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-3"><a href="#代码-3" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取正整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否为奇数</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> != <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; n &lt;&lt; <span class="string">&quot; is odd.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-E-完美成绩"><a href="#题目名称-E-完美成绩" class="headerlink" title="题目名称:E-完美成绩"></a>题目名称:E-完美成绩</h2><h3 id="题目描述-4"><a href="#题目描述-4" class="headerlink" title="题目描述"></a>题目描述</h3><p>  KiKi想知道他的考试成绩是否完美，请帮他判断。从键盘输入一个整数表示的成绩，编程判断成绩是否在90~100之间，如果是则输出“Perfect”。 </p>
+<h3 id="输入描述-4"><a href="#输入描述-4" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个整数表示的成绩（90~100）。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-4"><a href="#输出描述-4" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出“Perfect”。      </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-4"><a href="#输入-4" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">98</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-4"><a href="#输出-4" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Perfect</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-4"><a href="#代码-4" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score;</span><br><span class="line">    <span class="comment">// 读取成绩</span></span><br><span class="line">    cin &gt;&gt; score;</span><br><span class="line">    <span class="comment">// 判断成绩是否在90到100之间</span></span><br><span class="line">    <span class="keyword">if</span> (score &gt;= <span class="number">90</span> &amp;&amp; score &lt;= <span class="number">100</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Perfect&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-F-跳绳达人"><a href="#题目名称-F-跳绳达人" class="headerlink" title="题目名称:F-跳绳达人"></a>题目名称:F-跳绳达人</h2><h3 id="题目描述-5"><a href="#题目描述-5" class="headerlink" title="题目描述"></a>题目描述</h3><p>Kiki跳绳很厉害，他想知道自己是不是跳绳达人。输入一分钟跳绳的次数，若大于等于220次，输出“跳绳达人”，否则输出“继续努力”。</p>
+<h3 id="输入描述-5"><a href="#输入描述-5" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一分钟跳绳次数</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-5"><a href="#输出描述-5" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若大于等于220次，输出“跳绳达人”，否则输出“继续努力”。                      </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-5"><a href="#输入-5" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">240</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-5"><a href="#输出-5" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">跳绳达人</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-5"><a href="#代码-5" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> jumpCount;</span><br><span class="line">    <span class="comment">// 读取一分钟跳绳次数</span></span><br><span class="line">    cin &gt;&gt; jumpCount;</span><br><span class="line">    <span class="comment">// 判断是否为跳绳达人</span></span><br><span class="line">    <span class="keyword">if</span> (jumpCount &gt;= <span class="number">220</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;跳绳达人&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;继续努力&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-G-判断奇偶"><a href="#题目名称-G-判断奇偶" class="headerlink" title="题目名称:G-判断奇偶"></a>题目名称:G-判断奇偶</h2><h3 id="题目描述-6"><a href="#题目描述-6" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个整数n是奇数还是偶数,如果是奇数,输出”odd”, 否则输出”even”</p>
+<h3 id="输入描述-6"><a href="#输入描述-6" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数n（1 &lt;= n &lt;= 100）</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-6"><a href="#输出描述-6" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出odd或者even                </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-6"><a href="#输入-6" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-6"><a href="#输出-6" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">even</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-6"><a href="#代码-6" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断奇偶性</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;even&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;odd&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-H-环保打印"><a href="#题目名称-H-环保打印" class="headerlink" title="题目名称:H-环保打印"></a>题目名称:H-环保打印</h2><h3 id="题目描述-7"><a href="#题目描述-7" class="headerlink" title="题目描述"></a>题目描述</h3><p>​	ReRe上网课每天都需要打印老师留的作业，为了环保，她一般都用一张A4纸进行双面打印（既：正反面都打印作业），已知一份电子版的作业材料有n页，请帮ReRe计算一下至少需要几张A4纸？</p>
+<h3 id="输入描述-7"><a href="#输入描述-7" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数 n(0≤n≤20)，代表一份电子版的学习材料的页数。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-7"><a href="#输出描述-7" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">双面打印所需要的A4纸张数。              </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-7"><a href="#输入-7" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">4</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-7"><a href="#输出-7" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">2</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-7"><a href="#代码-7" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取材料页数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 计算所需A4纸张数</span></span><br><span class="line">    <span class="type">int</span> pages_needed = (n + <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">    cout &lt;&lt; pages_needed &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-I-被5整除问题"><a href="#题目名称-I-被5整除问题" class="headerlink" title="题目名称:I-被5整除问题"></a>题目名称:I-被5整除问题</h2><h3 id="题目描述-8"><a href="#题目描述-8" class="headerlink" title="题目描述"></a>题目描述</h3><p>  判断一个整数是否能5整除是一个挺简单的问题，懒惰的KiKi还是不想自己做，于是找到你帮他写代码，你就帮帮他吧。 </p>
+<h3 id="输入描述-8"><a href="#输入描述-8" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个整数M（1≤M≤100,000）。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-8"><a href="#输出描述-8" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出包括一行，如果M可以被5整除就输出YES，否则输出NO（结果大小写敏感）。            </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-8"><a href="#输入-8" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-8"><a href="#输出-8" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-8"><a href="#代码-8" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> M;</span><br><span class="line">    <span class="comment">// 读取整数M</span></span><br><span class="line">    cin &gt;&gt; M;</span><br><span class="line">    <span class="comment">// 判断是否能被5整除</span></span><br><span class="line">    <span class="keyword">if</span> (M % <span class="number">5</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-J-判断是否为两位数"><a href="#题目名称-J-判断是否为两位数" class="headerlink" title="题目名称:J-判断是否为两位数"></a>题目名称:J-判断是否为两位数</h2><h3 id="题目描述-9"><a href="#题目描述-9" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个正整数是否是两位数(即大于等于10且小于等于99)。若该正整数是两位数，输出1，否则输出0。</p>
+<h3 id="输入描述-9"><a href="#输入描述-9" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个正整数，不超过1000。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-9"><a href="#输出描述-9" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，若该正整数是两位数，输出1，否则输出0。            </span><br></pre></td></tr></table></figure>
+
+<h2 id="输入-9"><a href="#输入-9" class="headerlink" title="输入"></a>输入</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">68</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出-9"><a href="#输出-9" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-9"><a href="#代码-9" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取正整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否是两位数</span></span><br><span class="line">    <span class="keyword">if</span> (n &gt;= <span class="number">10</span> &amp;&amp; n &lt;= <span class="number">99</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;1&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;0&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-K-两个数中较大"><a href="#题目名称-K-两个数中较大" class="headerlink" title="题目名称:K-两个数中较大"></a>题目名称:K-两个数中较大</h2><h3 id="题目描述-10"><a href="#题目描述-10" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入两个整数，输出两个数中较大的。</p>
+<h3 id="输入描述-10"><a href="#输入描述-10" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入两个整数a, b(1 ≤ a, b ≤ 1000)，空格隔开。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-10"><a href="#输出描述-10" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a, b中较大的         </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-10"><a href="#输入-10" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">16 22</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出-10"><a href="#输出-10" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">22</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-10"><a href="#代码-10" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a, b;</span><br><span class="line">    <span class="comment">// 读取两个整数</span></span><br><span class="line">    cin &gt;&gt; a &gt;&gt; b;</span><br><span class="line">    <span class="comment">// 判断并输出较大的数</span></span><br><span class="line">    <span class="keyword">if</span> (a &gt; b) &#123;</span><br><span class="line">        cout &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; b &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-L-编程达人"><a href="#题目名称-L-编程达人" class="headerlink" title="题目名称:L-编程达人"></a>题目名称:L-编程达人</h2><h3 id="题目描述-11"><a href="#题目描述-11" class="headerlink" title="题目描述"></a>题目描述</h3><p>ReRe努力学习编程，请编程帮她判断学习情况。 		</p>
+<h3 id="输入描述-11"><a href="#输入描述-11" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数表示2个小时完成编程的题目数目。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-11"><a href="#输出描述-11" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">根据2个小时完成编程的题目数目，若大于等于10道，输出“Super programmer!”，否则输出“Come on!”                    </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-11"><a href="#输入-11" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">20</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-11"><a href="#输出-11" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Super programmer!</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-11"><a href="#代码-11" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取题目数目</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 判断学习情况并输出</span></span><br><span class="line">    <span class="keyword">if</span> (num &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Super programmer!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Come on!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-M-比大小"><a href="#题目名称-M-比大小" class="headerlink" title="题目名称:M-比大小"></a>题目名称:M-比大小</h2><h3 id="题目描述-12"><a href="#题目描述-12" class="headerlink" title="题目描述"></a>题目描述</h3><p>  比较整数a和整数b的大小。 </p>
+<h3 id="输入描述-12"><a href="#输入描述-12" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行两个整数，由空格隔开，分别代表整数a、b的值</span><br><span class="line">(1&lt;=a,b&lt;=10000)</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-12"><a href="#输出描述-12" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若a比b小，输出&quot;&lt;&quot;</span><br><span class="line">若a与b相等，输出&quot;=&quot;</span><br><span class="line"></span><br><span class="line">若a比b大，输出&quot;&gt;&quot;</span><br><span class="line">实际输出中，不包含双引号       </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-12"><a href="#输入-12" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1 2</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-12"><a href="#输出-12" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-12"><a href="#代码-12" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> a, b;</span><br><span class="line">    <span class="comment">// 读取两个整数</span></span><br><span class="line">    cin &gt;&gt; a &gt;&gt; b;</span><br><span class="line">    <span class="comment">// 比较大小并输出结果</span></span><br><span class="line">    <span class="keyword">if</span> (a &lt; b) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;&lt;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (a == b) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;=&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;&gt;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-N-牛妹数"><a href="#题目名称-N-牛妹数" class="headerlink" title="题目名称:N-牛妹数"></a>题目名称:N-牛妹数</h2><h3 id="题目描述-13"><a href="#题目描述-13" class="headerlink" title="题目描述"></a>题目描述</h3><p>  如果一个数是一个偶数而且大于50,我们称它为牛妹数 </p>
+<p>  给你一个数,判断它是否是牛妹数 </p>
+<h3 id="输入描述-13"><a href="#输入描述-13" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一个整数n (1 &lt;= n &lt;= 100)</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-13"><a href="#输出描述-13" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果是牛妹数,输出&quot;yes&quot;, 否则输出&quot;no&quot;                  </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-13"><a href="#输入-13" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">50</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-13"><a href="#输出-13" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">no</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-13"><a href="#代码-13" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否是牛妹数</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">2</span> == <span class="number">0</span> &amp;&amp; n &gt; <span class="number">50</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;yes&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;no&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-O-判断一个数能否同时被3和5整除"><a href="#题目名称-O-判断一个数能否同时被3和5整除" class="headerlink" title="题目名称:O-判断一个数能否同时被3和5整除"></a>题目名称:O-判断一个数能否同时被3和5整除</h2><h3 id="题目描述-14"><a href="#题目描述-14" class="headerlink" title="题目描述"></a>题目描述</h3><p>判断一个数n 能否同时被3和5整除，如果能同时被3和5整除输出YES，否则输出NO。 </p>
+<h3 id="输入描述-14"><a href="#输入描述-14" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行，包含一个整数n。（ -1,000,000 &lt; n &lt; 1,000,000）</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-14"><a href="#输出描述-14" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入一行，包含一个整数n。（ -1,000,000 &lt; n &lt; 1,000,000）                 </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-14"><a href="#输入-14" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">15</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-14"><a href="#输出-14" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-14"><a href="#代码-14" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="comment">// 读取整数</span></span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="comment">// 判断是否能同时被3和5整除</span></span><br><span class="line">    <span class="keyword">if</span> (n % <span class="number">3</span> == <span class="number">0</span> &amp;&amp; n % <span class="number">5</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-P-判断字母"><a href="#题目名称-P-判断字母" class="headerlink" title="题目名称:P-判断字母"></a>题目名称:P-判断字母</h2><h3 id="题目描述-15"><a href="#题目描述-15" class="headerlink" title="题目描述"></a>题目描述</h3><p>从键盘任意输入一个字符，编程判断是否是字母（包括大小写）。</p>
+<h3 id="输入描述-15"><a href="#输入描述-15" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入包括一个字符。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-15"><a href="#输出描述-15" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输出该字符是字母（YES）或不是（NO）。           </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-15"><a href="#输入-15" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">H</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-15"><a href="#输出-15" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">YES</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-15"><a href="#代码-15" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">char</span> ch;</span><br><span class="line">    <span class="comment">// 读取字符</span></span><br><span class="line">    cin &gt;&gt; ch;</span><br><span class="line">    <span class="comment">// 判断是否是字母</span></span><br><span class="line">    <span class="keyword">if</span> ((ch &gt;= <span class="string">&#x27;A&#x27;</span> &amp;&amp; ch &lt;= <span class="string">&#x27;Z&#x27;</span>) || (ch &gt;= <span class="string">&#x27;a&#x27;</span> &amp;&amp; ch &lt;= <span class="string">&#x27;z&#x27;</span>)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;YES&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;NO&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-Q-KiKi的最高分"><a href="#题目名称-Q-KiKi的最高分" class="headerlink" title="题目名称:Q-KiKi的最高分"></a>题目名称:Q-KiKi的最高分</h2><h3 id="题目描述-16"><a href="#题目描述-16" class="headerlink" title="题目描述"></a>题目描述</h3><p>KiKi知道了大一三科比较重要课程的分数，包括：程序设计基础，高数，英语，请编程帮他找到三科中的最高分。</p>
+<h3 id="输入描述-16"><a href="#输入描述-16" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，三个整数，用空格分隔，代表三科成绩。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-16"><a href="#输出描述-16" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，一个整数，代表输入三科分数中的最高分数。               </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-16"><a href="#输入-16" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">90 88 99</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出-16"><a href="#输出-16" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">99</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-16"><a href="#代码-16" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> score1, score2, score3;</span><br><span class="line">    <span class="comment">// 读取三科成绩</span></span><br><span class="line">    cin &gt;&gt; score1 &gt;&gt; score2 &gt;&gt; score3;</span><br><span class="line">    <span class="comment">// 找到最高分数</span></span><br><span class="line">    <span class="type">int</span> maxScore = <span class="built_in">max</span>(<span class="built_in">max</span>(score1, score2), score3);</span><br><span class="line">    <span class="comment">// 输出最高分数</span></span><br><span class="line">    cout &lt;&lt; maxScore &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-R-判断输出"><a href="#题目名称-R-判断输出" class="headerlink" title="题目名称:R-判断输出"></a>题目名称:R-判断输出</h2><h3 id="题目描述-17"><a href="#题目描述-17" class="headerlink" title="题目描述"></a>题目描述</h3><p>输入一个正整数，如果小于等于10就把这个整数输出。</p>
+<h3 id="输入描述-17"><a href="#输入描述-17" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一个整数(1~1000)</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出描述-17"><a href="#输出描述-17" class="headerlink" title="输出描述"></a>输出描述</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果小于等于10就把这个整数输出。                </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-17"><a href="#输入-17" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出-17"><a href="#输出-17" class="headerlink" title="输出"></a>输出</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">6</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-17"><a href="#代码-17" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> num;</span><br><span class="line">    <span class="comment">// 读取输入整数</span></span><br><span class="line">    cin &gt;&gt; num;</span><br><span class="line">    <span class="comment">// 如果小于等于10，就输出</span></span><br><span class="line">    <span class="keyword">if</span> (num &lt;= <span class="number">10</span>) &#123;</span><br><span class="line">        cout &lt;&lt; num &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-S-计算y的值"><a href="#题目名称-S-计算y的值" class="headerlink" title="题目名称:S-计算y的值"></a>题目名称:S-计算y的值</h2><h3 id="题目描述-18"><a href="#题目描述-18" class="headerlink" title="题目描述"></a>题目描述</h3><p>  已知一个函数y&#x3D;f(x)，当x &lt; 0时，y &#x3D; 1；当x &#x3D; 0时，y &#x3D; 0；当x &gt; 0时，y &#x3D; -1。  </p>
+<h3 id="输入描述-18"><a href="#输入描述-18" class="headerlink" title="输入描述:"></a>输入描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，输入一个整数x。（-10000&lt;x&lt;10000）</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-18"><a href="#输出描述-18" class="headerlink" title="输出描述:"></a>输出描述:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，输出y的值。                        </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-18"><a href="#输入-18" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-18"><a href="#输出-18" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-1</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-18"><a href="#代码-18" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> x;</span><br><span class="line">    <span class="comment">// 读取输入整数</span></span><br><span class="line">    cin &gt;&gt; x;</span><br><span class="line">    <span class="comment">// 根据题目条件计算并输出y的值</span></span><br><span class="line">    <span class="type">int</span> y;</span><br><span class="line">    <span class="keyword">if</span> (x &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        y = <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (x == <span class="number">0</span>) &#123;</span><br><span class="line">        y = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        y = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; y &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="题目名称-T-有一门课不及格的学生"><a href="#题目名称-T-有一门课不及格的学生" class="headerlink" title="题目名称:T-有一门课不及格的学生"></a>题目名称:T-有一门课不及格的学生</h2><h3 id="题目描述-19"><a href="#题目描述-19" class="headerlink" title="题目描述"></a>题目描述</h3><p>​		给出一名学生的语文和数学成绩，判断他是否恰好有一门课不及格(成绩小于60分)。若该生恰好有一门课不及格，输出1；否则输出0。 </p>
+<h3 id="输入描述-19"><a href="#输入描述-19" class="headerlink" title="输入描述"></a>输入描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">一行，包含两个在0到100之间的整数，分别是该生的语文成绩和数学成绩。</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出描述-19"><a href="#输出描述-19" class="headerlink" title="输出描述"></a>输出描述</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">若该生恰好有一门课不及格，输出1；否则输出0。               </span><br></pre></td></tr></table></figure>
+
+<h3 id="输入-19"><a href="#输入-19" class="headerlink" title="输入"></a>输入</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">50 80</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出-19"><a href="#输出-19" class="headerlink" title="输出"></a>输出</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码-19"><a href="#代码-19" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> chinese, math;</span><br><span class="line">    <span class="comment">// 读取输入的语文和数学成绩</span></span><br><span class="line">    cin &gt;&gt; chinese &gt;&gt; math;</span><br><span class="line">    <span class="comment">// 判断是否恰好有一门课不及格</span></span><br><span class="line">    <span class="keyword">if</span> ((chinese &lt; <span class="number">60</span> &amp;&amp; math &gt;= <span class="number">60</span>) || (chinese &gt;= <span class="number">60</span> &amp;&amp; math &lt; <span class="number">60</span>)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;1&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;0&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
